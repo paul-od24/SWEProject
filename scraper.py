@@ -4,7 +4,7 @@ import traceback
 import apilogin
 import sqlalchemy as sqla
 from sqlalchemy import create_engine
-from sqlalchemy import insert
+from sqlalchemy.dialects.mysql import insert
 import datetime
 import dblogin
 
@@ -40,11 +40,25 @@ def write_to_db(text):
     data = json.loads(text)
     # starting transaction
     with engine.begin() as connection:
-        # preparing statement for insertion
-        stmt = tuple(map(fix_data, data))
-        # executing insert operations for each of the tables (station & availability)
-        connection.execute(insert(station), stmt)
-        connection.execute(insert(availability), stmt)
+
+        vals = tuple(map(fix_data, data))
+        # preparing statement station insert
+        stmt = insert(station)
+        # adding parameters to the statement to "ignore" duplicate keys (-> update with same values)
+        odk_stmt = stmt.on_duplicate_key_update(
+            number=stmt.inserted.number,
+            status=stmt.inserted.status)
+        # executing insert operations for station
+        connection.execute(odk_stmt, vals)
+
+        # preparing statement availability insert
+        stmt = insert(availability)
+        # adding parameters to the statement to "ignore" duplicate keys (-> update with same values)
+        odk_stmt = stmt.on_duplicate_key_update(
+            number=stmt.inserted.number,
+            last_update=stmt.inserted.last_update)
+        # executing insert operations for availability
+        connection.execute(odk_stmt, vals)
 
 
 # function to "fix" data so it can be processed in the db without issues
