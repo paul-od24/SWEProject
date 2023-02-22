@@ -61,7 +61,7 @@ def main():
         now = datetime.datetime.now()
         # getting the data from the api
         r = requests.get(STATIONS, params={'apiKey': APIKEY, 'contract': NAME})
-        #calling function to write data to api
+        # calling function to write data to db
         write_to_db(r.text)
     except:
         print(traceback.format_exc())
