@@ -44,19 +44,17 @@ def write_to_db(text):
         vals = tuple(map(fix_data, data))
         # preparing statement station insert
         stmt = insert(station)
-        # adding parameters to the statement to "ignore" duplicate keys (-> update with same values)
+        # adding parameters to the statement to "ignore" duplicate keys (-> update with same value)
         odk_stmt = stmt.on_duplicate_key_update(
-            number=stmt.inserted.number,
-            status=stmt.inserted.status)
+            number=stmt.inserted.number)
         # executing insert operations for station
         connection.execute(odk_stmt, vals)
 
         # preparing statement availability insert
         stmt = insert(availability)
-        # adding parameters to the statement to "ignore" duplicate keys (-> update with same values)
+        # adding parameters to the statement to "ignore" duplicate keys (-> update with same value)
         odk_stmt = stmt.on_duplicate_key_update(
-            number=stmt.inserted.number,
-            last_update=stmt.inserted.last_update)
+            number=stmt.inserted.number)
         # executing insert operations for availability
         connection.execute(odk_stmt, vals)
 

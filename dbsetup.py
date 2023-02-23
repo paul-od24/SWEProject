@@ -26,10 +26,10 @@ bike_stands INTEGER,
 bonus INTEGER,
 contract_name VARCHAR(256),
 name VARCHAR(256),
-number INTEGER,
+number INTEGER NOT NULL,
 position_lat REAL,
 position_lng REAL,
-status VARCHAR(256)
+CONSTRAINT PK_station PRIMARY KEY (number)
 );
 """
 
@@ -45,10 +45,12 @@ except Exception as e:
 # preparing sql statement to create availability table
 sql = """
 CREATE TABLE IF NOT EXISTS availability(
-number INTEGER,
+number INTEGER NOT NULL,
 available_bikes INTEGER,
 available_bike_stands INTEGER,
-last_update DATETIME
+status VARCHAR(256),
+last_update DATETIME NOT NULL,
+CONSTRAINT PK_availability PRIMARY KEY (number,last_update)
 );
 """
 
