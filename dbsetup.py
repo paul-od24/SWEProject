@@ -61,3 +61,70 @@ try:
         print(res.fetchall())
 except Exception as e:
     print(e)  # traceback.format_exc())
+
+# preparing sql statement to create weather_historical table
+sql = """
+CREATE TABLE IF NOT EXISTS weather_historical(
+time DATETIME NOT NULL,
+temp FLOAT,
+wind_dir FLOAT,
+wind_speed FLOAT,
+wind_gust FLOAT,
+global_rad DOUBLE,
+humidity FLOAT,
+pressure DOUBLE,
+cloudiness FLOAT,
+low_clouds FLOAT,
+med_clouds FLOAT,
+high_clouds FLOAT,
+dew_temp FLOAT,
+rain FLOAT,
+rain_min FLOAT,
+rain_max FLOAT,
+rain_prob FLOAT,
+CONSTRAINT weather_historical PRIMARY KEY (time)
+);
+"""
+
+# creating weather_historical table
+try:
+    with engine.begin() as connection:
+        res = connection.execute(text(sql))
+        print(res.fetchall())
+except Exception as e:
+    print(e)  # traceback.format_exc())
+
+# preparing sql statement to create weather_forecast table
+sql = """
+CREATE TABLE IF NOT EXISTS weather_forecast(
+type VARCHAR(256),
+start DATETIME NOT NULL,
+end DATETIME NOT NULL,
+temp FLOAT,
+wind_dir FLOAT,
+wind_speed FLOAT,
+wind_gust FLOAT,
+global_rad DOUBLE,
+humidity FLOAT,
+pressure DOUBLE,
+cloudiness FLOAT,
+low_clouds FLOAT,
+med_clouds FLOAT,
+high_clouds FLOAT,
+dew_temp FLOAT,
+rain FLOAT,
+rain_hourly FLOAT,
+rain_min FLOAT,
+rain_max FLOAT,
+rain_prob FLOAT,
+CONSTRAINT weather_forecast PRIMARY KEY (start,end)
+);
+"""
+
+# creating weather_forecast table
+try:
+    with engine.begin() as connection:
+        res = connection.execute(text(sql))
+        print(res.fetchall())
+except Exception as e:
+    print(e)  # traceback.format_exc())
