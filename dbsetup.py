@@ -36,7 +36,6 @@ CONSTRAINT PK_station PRIMARY KEY (number)
 # create station table
 try:
     with engine.begin() as connection:
-        connection.execute(text("DROP TABLE IF EXISTS station;"))
         res = connection.execute(text(sql))
         print(res.fetchall())
 except Exception as e:
