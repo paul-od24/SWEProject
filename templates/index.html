@@ -1,0 +1,22 @@
+<!--adapted from -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>dbikes23</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+    <link rel="stylesheet" type="text/css" href="../static/css/style.css" />
+    <script type="text/javascript" src="../static/js/index.js"></script>
+    <script>
+      setPinDic({{ dic|safe }})
+    </script>
+  </head>
+  <body>
+    <h3>dbikes23 demo</h3>
+    <div id="map"></div>
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key={{mapkey}}&callback=initMap&v=weekly"
+      defer
+    >
+    </script>
+  </body>
+</html>
