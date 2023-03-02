@@ -1,9 +1,8 @@
 import json
 
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template
 import sqlalchemy as sqla
 from sqlalchemy import create_engine, select
-import pandas as pd
 import dblogin
 import apilogin
 
@@ -35,8 +34,6 @@ app = Flask(__name__, template_folder="./templates")
 
 @app.route("/")
 def mapview():
-    # pins= json.dumps()
-    # pins.status_code = 200
     return render_template('index.html', dic=json.dumps(pinDic), mapkey=apilogin.MAPKEY)
 
 
