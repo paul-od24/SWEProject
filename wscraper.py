@@ -129,6 +129,8 @@ def Rain(time, data, h = 1):
         data['rain_min'] = loc.find('precipitation').attrib['minvalue']
         data['rain_max'] = loc.find('precipitation').attrib['maxvalue']
         data['rain_prob'] = loc.find('precipitation').attrib['probability']
+    # add weather symbol to data
+    data['symbol'] = loc.find('symbol').attrib['id']
 
 def write_to_db(table, data):
     try:
@@ -177,6 +179,7 @@ for time in root.iter('time'):
             data['rain_min'] = loc.find('precipitation').attrib['minvalue']
             data['rain_max'] = loc.find('precipitation').attrib['maxvalue']
             data['rain_prob'] = loc.find('precipitation').attrib['probability']
+            data['symbol'] = loc.find('symbol').attrib['id']
             # no longer first
             first = False
             # write to weather_historical table
