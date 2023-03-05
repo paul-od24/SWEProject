@@ -12,11 +12,30 @@
   </head>
   <body>
     <h3>dbikes23 demo</h3>
-    <div id="map"></div>
+    <div id="main_div">
+      <div id="map"></div>
+      <div id="weather">
+        <table id="weather_cur">
+        </table>
+        <div style="overflow-x:auto;">
+          <table id="weather_48">
+          </table>
+        </div>
+        <div style="overflow-x:auto;">
+          <table id="weather_week">
+          </table>
+        </div>
+      </div>
+    </div>
     <script
       src="https://maps.googleapis.com/maps/api/js?key={{mapkey}}&callback=initMap&v=weekly"
       defer
     >
+    </script>
+    <script>
+      popWeatherCurrent({{wCur|safe}});
+      popWeather48({{wetDic|safe}});
+      popWeatherWeek({{wetDic|safe}});
     </script>
   </body>
 </html>
