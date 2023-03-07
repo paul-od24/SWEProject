@@ -19,14 +19,23 @@ station = sqla.Table("station", metadataS,
                      schema='dbikes'
                      )
 
-stmt = select(station.c.name, station.c.position_lat, station.c.position_lng)
+stmt = select(station.c.number, station.c.name, station.c.position_lat, station.c.position_lng)
 
 pinDic = {}
+infoDic = {}
 
 with engine.begin() as connection:
     for row in connection.execute(stmt):
         pos = {"lat": float(row.position_lat), "lng": float(row.position_lng)}
         pinDic[row.name] = pos
+        infoStmt='''
+        select station.name, available_bikes, available_bike_stands, last_update, availability.`number`  
+from station, availability
+WHERE availability.`number` = 73 AND station.number=availability.`number` 
+ORDER BY `last_update` DESC 
+limit 1;
+        '''
+
 
 print(str(pinDic))
 
@@ -71,7 +80,7 @@ app = Flask(__name__, template_folder="./templates")
 def mapview():
     # pins= json.dumps()
     # pins.status_code = 200
-    return render_template('index.html', dic=json.dumps(pinDic), mapkey=apilogin.MAPKEY, wCur=json.dumps(wCur), wetDic=json.dumps(wetDic))
+    return render_template('index.html', dic=json.dumps(pinDic), mapkey=apilogin.MAPKEY, wCur=json.dumps(wCur), wetDic=json.dumps(wetDic), name=json.dumps(name), bikesAvail=json.dumps(bikesAvail))
 
 
 if __name__ == "__main__":

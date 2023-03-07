@@ -1,6 +1,6 @@
 // define with a global scope so setPinDic and initMap can both access it
 let pinDic
-
+let stations
 // function to get the data from the html template
 // converts the input to a string, then to a JSON object
 function setPinDic(data) {
@@ -8,7 +8,7 @@ function setPinDic(data) {
   pinDic = JSON.parse(pinDic)
 }
 
-// Initialize and add the map
+//Initialize and add the map
 function initMap() {
   // The location Dublin
   const dublin = { lat: 53.3498, lng: -6.2603 };
@@ -19,11 +19,55 @@ function initMap() {
   });
 
   // array to store the markers
-  const stations = [];
+  stations = [];
+
+  for(let i in pinDic) {
+    stations.push(new google.maps.Marker({position: pinDic[i], map: map}));
+
+  // variable that stores the location of the bike stations icon
+  var image = {
+    url: "/static/icons/bike_icon.png",
+    scaledSize: new google.maps.Size(20, 20)
+  }};
 
   // looping through the pins and adding them to the map
   for(let i in pinDic) {
-    stations.push(new google.maps.Marker({position: pinDic[i], map: map,}));
+    const marker = new google.maps.Marker({
+      position: pinDic[i], 
+      map: map,
+      icon: image});
+
+    // create a new info window for the marker
+    const infoWindow = new google.maps.InfoWindow({
+      content: ''
+    });
+
+    // add mouseover and mouseout event listeners to the marker
+    marker.addListener('mouseover', function() {
+      // get the station information from the pinDic
+      const station = pinDic[i];
+
+
+      // create the content for the info window
+      const content = '<div>' +
+        '<h4>' + station.name + '</h4>' +
+        '<h5>Estimated available Bikes: ' + station.available_bikes + '</h5>' +
+        '<h5>Estimated available Spaces: ' + station.available_spaces + '</h5>' +
+        '<h6>Station number: ' + station.available_spaces + '</h6>' +
+        '</div>';
+
+      // set the content of the info window and open it
+      infoWindow.setContent(content);
+      infoWindow.open(map, marker);
+    });
+
+    marker.addListener('mouseout', function() {
+      // close the info window
+      infoWindow.close();
+    });
+
+    // add the marker to the array
+    stations.push(marker);
   }
 }
 
@@ -103,5 +147,20 @@ function popWeatherWeek(weatherDict) {
   }
   document.getElementById("weather_week").innerHTML = weather;
 }
+
+// create a button to hide the markers
+const hideButton = document.getElementById("button-id");
+hideButton.textContent = "Hide Markers";
+hideButton.style.marginBottom = "10px";
+hideButton.addEventListener("click", () => {
+  // toggle the visibility of the markers
+  stations.forEach(marker => {
+    if(marker.getVisible()){
+      marker.setVisible(false);
+    } else {
+      marker.setVisible(true);
+    }
+  });
+});
 
 window.initMap = initMap;
