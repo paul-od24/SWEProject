@@ -1,6 +1,14 @@
+#main_div {
+  display: flex;
+}
+
 
 #map {
   height: 90vh;
-  width: 100%;
+  width: 70%;
 
+}
+
+#weather {
+  width: 30%;
 }
