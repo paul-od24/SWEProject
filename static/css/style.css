@@ -10,5 +10,13 @@
 }
 
 #weather {
-  width: 30%;
+  width: 20%;
+}
+
+#button-id {
+  width : 50px;
+  height: 20px;
+  background-color: black;
+  color: white;
+
 }
