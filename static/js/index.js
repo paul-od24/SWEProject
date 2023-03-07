@@ -2,6 +2,8 @@
 let pinDic;
 // object to store the markers
 const stations = {};
+const dublin = { lat: 53.3498, lng: -6.2603 };
+let userloc;
 
 // function to get the data from the html template
 // converts the input to a string, then to a JSON object
@@ -13,7 +15,6 @@ function setPinDic(data) {
 // Initialize and add the map
 function initMap() {
   // The location Dublin
-  const dublin = { lat: 53.3498, lng: -6.2603 };
   // The map, centered at Dublin
   const map = new google.maps.Map(document.getElementById("map"), {
     zoom: 14,
@@ -23,8 +24,9 @@ function initMap() {
   // looping through the pins and adding them to the map
   for(let i in pinDic) {
     stations[pinDic[i]] = new google.maps.Marker({position: pinDic[i]["position"], map: map,})
-    // stations.push(new google.maps.Marker({position: pinDic[i], map: map,}));
   }
+  autocomplete()
+
 }
 
 // populate current weather table
@@ -133,6 +135,54 @@ function popWeatherWeek(weatherDict) {
     weather += rows[j];
   }
   document.getElementById("weather_week").innerHTML = weather;
+}
+
+function autocomplete() {
+    google.maps.event.addDomListener(window, 'load', initialize);
+}
+
+// adapted from https://developers.google.com/maps/documentation/javascript/place-autocomplete
+function initialize() {
+    let input = document.getElementById('autocomplete_search');
+    const defaultBounds = {
+    north: dublin.lat + 0.2,
+    south: dublin.lat - 0.2,
+    east: dublin.lng + 0.2,
+    west: dublin.lng - 0.2,
+    };
+    const options = {
+    bounds: defaultBounds,
+    componentRestrictions: { country: "ie" },
+    fields: ["address_components", "geometry", "icon", "name"],
+    strictBounds: false,
+  };
+
+    const autocomplete = new google.maps.places.Autocomplete(input, options);
+    autocomplete.addListener('place_changed', function () {
+        let place = autocomplete.getPlace();
+        userloc = JSON.stringify({"lat":place.geometry['location'].lat(), "lng": place.geometry['location'].lng()});
+        document.getElementById("debug").innerHTML = userloc;
+    });
+}
+
+function sendLoc() {
+  fetch(`${window.origin}`, {
+    method: "POST",
+    credentials: "include",
+    body: userloc,
+    cache: "no-cache",
+    headers: new Headers({
+      "content-type": "application/json"
+    })
+  })
+  .then((response) => response.json())
+  .then((data) => showClosest(data));
+
+}
+
+function showClosest(data) {
+  n = data["number"].toString()
+  document.getElementById("debug").innerHTML = "Closest station: " + pinDic[n]["name"] + "<br>" + "Distance: " + data["distance"] + " metres";
 }
 
 window.initMap = initMap;

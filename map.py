@@ -1,8 +1,9 @@
 import json
 
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 import sqlalchemy as sqla
 from sqlalchemy import create_engine, select, text
+from geopy import distance
 import dblogin
 import apilogin
 
@@ -28,6 +29,7 @@ with engine.begin() as connection:
         # static info to place pins on map
         pos = {"lat": float(row.position_lat), "lng": float(row.position_lng)}
         pinDic[row.number] = {"name": row.name, "position": pos}
+        print(pinDic)
 
         # pin information
         stmt2 = 'SELECT available_bikes, available_bike_stands, last_update FROM availability WHERE `number` = ' + str(
@@ -85,6 +87,21 @@ app = Flask(__name__, template_folder="./templates")
 def mapview():
     return render_template('index.html', dic=json.dumps(pinDic), mapkey=apilogin.MAPKEY, wCur=json.dumps(wCur),
                            wetDic=json.dumps(wetDic))
+
+# function taking a location from the webpage and checking for the closest station
+@app.route("/", methods=["post"])
+def findClosest():
+    userloc = dict(request.get_json())
+    userloc = (userloc["lat"], userloc["lng"])
+    mindist = -1
+    closest = {"failed": "failed"}
+    for i in pinDic:
+        teststation = (pinDic[i]["position"].get("lat"), pinDic[i]["position"].get("lng"))
+        d = distance.distance(userloc, teststation).m
+        if mindist == -1 or d < mindist:
+            mindist = round(d, 0)
+            closest = {"number": i, "distance": mindist}
+    return closest
 
 
 if __name__ == "__main__":
