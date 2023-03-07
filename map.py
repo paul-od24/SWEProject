@@ -1,8 +1,9 @@
 import json
 
-from flask import Flask, render_template
+from flask import Flask, render_template, jsonify
 import sqlalchemy as sqla
 from sqlalchemy import create_engine, select, text
+import pandas as pd
 import dblogin
 import apilogin
 
@@ -27,14 +28,7 @@ with engine.begin() as connection:
     for row in connection.execute(stmt):
         # static info to place pins on map
         pos = {"lat": float(row.position_lat), "lng": float(row.position_lng)}
-        pinDic[row.number] = {"name": row.name, "position": pos}
-
-        # pin information
-        stmt2 = 'SELECT available_bikes, available_bike_stands, last_update FROM availability WHERE `number` = ' + str(
-            row.number) + ' ORDER BY last_update DESC LIMIT 1;'
-        res = connection.execute(text(stmt2)).mappings().all()[0]
-        avDic[row.number] = dict(res)
-        avDic[row.number]["last_update"] = str(avDic[row.number].get("last_update"))
+        pinDic[row.name] = pos
 
 print(json.dumps(avDic))
 
@@ -83,8 +77,9 @@ app = Flask(__name__, template_folder="./templates")
 
 @app.route("/")
 def mapview():
-    return render_template('index.html', dic=json.dumps(pinDic), mapkey=apilogin.MAPKEY, wCur=json.dumps(wCur),
-                           wetDic=json.dumps(wetDic))
+    # pins= json.dumps()
+    # pins.status_code = 200
+    return render_template('index.html', dic=json.dumps(pinDic), mapkey=apilogin.MAPKEY, wCur=json.dumps(wCur), wetDic=json.dumps(wetDic))
 
 
 if __name__ == "__main__":

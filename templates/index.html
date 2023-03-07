@@ -28,7 +28,7 @@
       </div>
     </div>
     <script
-      src="https://maps.googleapis.com/maps/api/js?key={{mapkey}}&callback=initMap&v=weekly"
+      src="https://maps.googleapis.com/maps/api/js?key={{mapkey}}&libraries=places&callback=initMap&v=weekly"
       defer
     >
     </script>
@@ -37,5 +37,9 @@
       popWeather48({{wetDic|safe}});
       popWeatherWeek({{wetDic|safe}});
     </script>
+
+    <input id="autocomplete_search" type="text" size="50" style="margin-bottom: 50px">
+    <button type = button onclick="sendLoc()">Find closest station</button>
+    <div id = "debug"></div>
   </body>
 </html>

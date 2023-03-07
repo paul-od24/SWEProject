@@ -1,6 +1,5 @@
-let pinDic;
-// object to store the markers
-const stations = {};
+// define with a global scope so setPinDic and initMap can both access it
+let pinDic
 
 // function to get the data from the html template
 // converts the input to a string, then to a JSON object
@@ -22,7 +21,6 @@ function setPinDic(data) {
 
 function initMap() {
   // The location Dublin
-  const dublin = { lat: 53.3498, lng: -6.2603 };
   // The map, centered at Dublin
   const map = new google.maps.Map(document.getElementById("map"), {
     zoom: 14,
@@ -31,61 +29,12 @@ function initMap() {
 
   // looping through the pins and adding them to the map
   for(let i in pinDic) {
-    const station = pinDic[i];
-    const marker = new google.maps.Marker({
-      position: station.position,
-      map: map,
-      title: station.name,
-      visible: true, // add a property to track visibility state
-    });
-
-    // create the content of the info window
-    const content = `
-      <div>
-        <p><b>${station.name}</b></p>
-        <p>Available bikes: ${station.available_bikes}</p>
-        <p>Available bike stands: ${station.available_bike_stands}</p>
-        <p>Station number: ${station.number}</p>
-      </div>
-    `;
-
-    // create the info window with the content
-    const infowindow = new google.maps.InfoWindow({
-      content: content,
-    });
-
-    // add the event listeners to the marker
-    marker.addListener('mouseover', () => {
-      infowindow.open(map, marker);
-    });
-
-    marker.addListener('mouseout', () => {
-      infowindow.close();
-    });
-
-    // add marker to stations object with station number as key
-    stations[station.number] = marker;
+    stations.push(new google.maps.Marker({position: pinDic[i], map: map,}));
   }
-  
-  // toggle markers on button click
-  const toggleBtn = document.getElementById("toggleBtn");
-  toggleBtn.addEventListener("click", toggleMarkers);
+  autocomplete()
+
 }
 
-function toggleMarkers() {
-  // loop through all markers and toggle their visibility
-  for(let i in stations) {
-    const station = stations[i];
-    const marker = station.marker;
-    const visible = !station.visible;
-    marker.setVisible(visible);
-    // update the visibility state in the stations object
-    stations[i].visible = visible;
-  }
-}
-
-
-// populate current weather table
 function popWeatherCurrent(weatherDict) {
   // setup table head
   let weather = '<th colspan="';
@@ -191,6 +140,54 @@ function popWeatherWeek(weatherDict) {
     weather += rows[j];
   }
   document.getElementById("weather_week").innerHTML = weather;
+}
+
+function autocomplete() {
+    google.maps.event.addDomListener(window, 'load', initialize);
+}
+
+// adapted from https://developers.google.com/maps/documentation/javascript/place-autocomplete
+function initialize() {
+    let input = document.getElementById('autocomplete_search');
+    const defaultBounds = {
+    north: dublin.lat + 0.2,
+    south: dublin.lat - 0.2,
+    east: dublin.lng + 0.2,
+    west: dublin.lng - 0.2,
+    };
+    const options = {
+    bounds: defaultBounds,
+    componentRestrictions: { country: "ie" },
+    fields: ["address_components", "geometry", "icon", "name"],
+    strictBounds: false,
+  };
+
+    const autocomplete = new google.maps.places.Autocomplete(input, options);
+    autocomplete.addListener('place_changed', function () {
+        let place = autocomplete.getPlace();
+        userloc = JSON.stringify({"lat":place.geometry['location'].lat(), "lng": place.geometry['location'].lng()});
+        document.getElementById("debug").innerHTML = userloc;
+    });
+}
+
+function sendLoc() {
+  fetch(`${window.origin}`, {
+    method: "POST",
+    credentials: "include",
+    body: userloc,
+    cache: "no-cache",
+    headers: new Headers({
+      "content-type": "application/json"
+    })
+  })
+  .then((response) => response.json())
+  .then((data) => showClosest(data));
+
+}
+
+function showClosest(data) {
+  n = data["number"].toString()
+  document.getElementById("debug").innerHTML = "Closest station: " + pinDic[n]["name"] + "<br>" + "Distance: " + data["distance"] + " metres";
 }
 
 window.initMap = initMap;
