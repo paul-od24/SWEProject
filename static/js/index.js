@@ -19,11 +19,13 @@ function initMap() {
   });
 
   // array to store the markers
-  const stations = [];
+  const stations = {};
+
 
   // looping through the pins and adding them to the map
   for(let i in pinDic) {
-    stations.push(new google.maps.Marker({position: pinDic[i], map: map,}));
+    stations[pinDic[i]] = new google.maps.Marker({position: pinDic[i]["position"], map: map,})
+    // stations.push(new google.maps.Marker({position: pinDic[i], map: map,}));
   }
 }
 
