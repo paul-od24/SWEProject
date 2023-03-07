@@ -3,10 +3,8 @@ import json
 from flask import Flask, render_template
 import sqlalchemy as sqla
 from sqlalchemy import create_engine, select, text
-import pandas as pd
 import dblogin
 import apilogin
-import datetime
 
 # creating the engine
 engine = create_engine(
@@ -46,15 +44,15 @@ metadataWF = sqla.MetaData()
 
 # creating table object for weather_historical table
 weather_historical = sqla.Table("weather_historical", metadataWH,
-                     autoload_with=engine,
-                     schema='dbikes'
-                     )
+                                autoload_with=engine,
+                                schema='dbikes'
+                                )
 
 # creating table object for weather_forecast table
 weather_forecast = sqla.Table("weather_forecast", metadataWF,
-                          autoload_with=engine,
-                          schema='dbikes'
-                          )
+                              autoload_with=engine,
+                              schema='dbikes'
+                              )
 
 # creating wCur dictionary
 wCur = {}
@@ -62,13 +60,13 @@ wCur = {}
 stmt = "SELECT * FROM weather_historical ORDER BY `time` DESC LIMIT 1"
 # executing sql statment
 with engine.begin() as connection:
-        res = connection.execute(text(stmt))
-        res = res.mappings().all()
-        res = res[0]
-        data = {"symbol": res.symbol, "rain": res.rain}
-        wCur = data
+    res = connection.execute(text(stmt))
+    res = res.mappings().all()
+    res = res[0]
+    data = {"symbol": res.symbol, "rain": res.rain}
+    wCur = data
 
-# prpearing sql statement to get current weather
+# preparing sql statement to get current weather
 stmt = select(weather_forecast.c.end, weather_forecast.c.symbol, weather_forecast.c.rain_hourly)
 
 # creating weather forecast dictionary
@@ -85,11 +83,8 @@ app = Flask(__name__, template_folder="./templates")
 
 @app.route("/")
 def mapview():
-    return render_template('index.html', dic=json.dumps(pinDic), mapkey=apilogin.MAPKEY)
-    # pins= json.dumps()
-    # pins.status_code = 200
-    return render_template('index.html', dic=json.dumps(pinDic), mapkey=apilogin.MAPKEY, wCur=json.dumps(wCur), wetDic=json.dumps(wetDic))
-
+    return render_template('index.html', dic=json.dumps(pinDic), mapkey=apilogin.MAPKEY, wCur=json.dumps(wCur),
+                           wetDic=json.dumps(wetDic))
 
 
 if __name__ == "__main__":

@@ -1,5 +1,7 @@
 // define with a global scope so setPinDic and initMap can both access it
-let pinDic
+let pinDic;
+// object to store the markers
+const stations = {};
 
 // function to get the data from the html template
 // converts the input to a string, then to a JSON object
@@ -17,10 +19,6 @@ function initMap() {
     zoom: 14,
     center: dublin,
   });
-
-  // array to store the markers
-  const stations = {};
-
 
   // looping through the pins and adding them to the map
   for(let i in pinDic) {
