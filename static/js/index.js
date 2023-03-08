@@ -1,24 +1,31 @@
 // define with a global scope so setPinDic and initMap can both access it
-let pinDic
+let pinDic;
+let avDic;
+// object to store the markers
+const stations = {};
+const dublin = { lat: 53.3498, lng: -6.2603 };
+let userloc;
 
 // function to get the data from the html template
 // converts the input to a string, then to a JSON object
 function setPinDic(data) {
-  pinDic = JSON.parse(JSON.stringify(data));
-  // Add station information to pinDic object
+  pinDic = JSON.stringify(data)
+  pinDic = JSON.parse(pinDic)
   for (let i in pinDic) {
-    const station = pinDic[i];
-    station.name = station.address.split(',')[0];
-    station.available_bikes = station.available_bikes || 0;
-    station.available_bike_stands = station.available_bike_stands || 0;
-    station.number = station.number || i;
+    // add bike availability information to the pin dictionary
+    pinDic[i]["available_bikes"] = avDic[i]["available_bikes"];
+    pinDic[i]["available_bike_stands"] = avDic[i]["available_bike_stands"];
   }
-  
-  // toggle markers on button click
-  const toggleBtn = document.getElementById("toggleBtn");
-  toggleBtn.addEventListener("click", toggleMarkers);
 }
+// function to get availability data from the html template
+// converts the input to a string, then to a JSON object
+//function setAvDic(data) {
+  //avDic = JSON.stringify(data)
+  //avDic = JSON.parse(avDic)
+//}
 
+
+// Initialize and add the map
 function initMap() {
   // The location Dublin
   // The map, centered at Dublin
@@ -27,14 +34,35 @@ function initMap() {
     center: dublin,
   });
 
+  // Create an InfoWindow object
+  const infowindow = new google.maps.InfoWindow();
+
   // looping through the pins and adding them to the map
-  for(let i in pinDic) {
-    stations.push(new google.maps.Marker({position: pinDic[i], map: map,}));
+  for (let i in pinDic) {
+    const stationMarker = new google.maps.Marker({
+      position: pinDic[i]["position"],
+      map: map,
+    });
+
+    // Add an event listener to show the InfoWindow when you hover over the marker
+google.maps.event.addListener(stationMarker, "mouseover", function () {
+  infowindow.setContent(
+    `<div><strong>${pinDic[i]["name"]} <br> Station Number:  ${i}</strong><br>Available Bikes: ${pinDic[i]["available_bikes"]}<br>Available Bike Stands: ${pinDic[i]["available_bike_stands"]}</div>`
+  );
+  infowindow.open(map, stationMarker);
+});
+
+    // Hide the InfoWindow when you move away from the marker
+    google.maps.event.addListener(stationMarker, "mouseout", function () {
+      infowindow.close();
+    });
+
+    console.log("Added marker for station " + pinDic[i]["number"]); // added for debugging
+    stations[pinDic[i]["number"]] = stationMarker;
   }
   autocomplete()
-
 }
-
+// populate current weather table
 function popWeatherCurrent(weatherDict) {
   // setup table head
   let weather = '<th colspan="';
