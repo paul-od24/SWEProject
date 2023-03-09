@@ -15,14 +15,16 @@ engine = create_engine(
 metadataS = sqla.MetaData()
 # creating table object for station table
 station = sqla.Table("station", metadataS,
-                     autoload=engine,
+                     autoload=True,
+                     autoload_with=engine,
                      schema='dbikes'
                      )
 
 metadataS = sqla.MetaData()
 # creating table object for availability table
 availability = sqla.Table("availability", metadataS,
-                     autoload=engine,
+                     autoload=True,
+                     autoload_with=engine,
                      schema='dbikes'
                      )
 
@@ -73,7 +75,8 @@ metadataWF = sqla.MetaData()
 
 # creating table object for weather_historical table
 weather_historical = sqla.Table("weather_historical", metadataWH,
-                                autoload=engine,
+                                autoload=True,
+                                autoload_with=engine,
                                 schema='dbikes'
                                 )
 
@@ -81,7 +84,7 @@ weather_historical = sqla.Table("weather_historical", metadataWH,
 weather_forecast = sqla.Table("weather_forecast", metadataWF,
                               schema='dbikes',
                               autoload=True,
-                              autoload_with=engine
+                              autoload_with=engine,
                               )
 
 # creating wCur dictionary
