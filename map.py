@@ -26,33 +26,24 @@ availability = sqla.Table("availability", metadataS,
                      schema='dbikes'
                      )
 
-stmt = select(
-    station.c.number, 
-    station.c.name, 
-    station.c.position_lat, 
-    station.c.position_lng, 
-    availability.c.available_bikes, 
-    availability.c.available_bike_stands
-).select_from(station.join(availability, station.c.number == availability.c.number)).order_by(station.c.number)
-
-# pin information
-stmt2 = select([station.c.number, station.c.name, station.c.position_lat, station.c.position_lng,text('a.available_bikes'), text('a.available_bike_stands')]).select_from(station).join(text('(SELECT * FROM availability a1 ORDER BY a1.last_update DESC) a'), text('a.number = station.number')).group_by(station.c.number)
+stmt = select(station.c.number, station.c.name, station.c.position_lat, station.c.position_lng)
 
 pinDic = {}
-avDic = {}
 
 with engine.begin() as connection:
     for row in connection.execute(stmt):
-        # pin information
-        avDic[row.number] = {"available_bikes": row.available_bikes, "available_bike_stands": row.available_bike_stands}
-
-    # loop through the results and add to pinDic dictionary
-    for row in connection.execute(stmt2):
-        # static info to place pins on map
         pos = {"lat": float(row.position_lat), "lng": float(row.position_lng)}
-        pinDic[row.number] = {"name": row.name, "number": row.number, "position": pos, "available_bikes": row.available_bikes, "available_bike_stands": row.available_bike_stands}
-#print(pinDic)
-print(json.dumps(avDic))
+        # pin information
+        stmt2 = 'SELECT available_bikes, available_bike_stands, last_update FROM availability WHERE `number` = ' + str(
+            row.number) + ' ORDER BY last_update DESC LIMIT 1;'
+        res = connection.execute(text(stmt2)).mappings().all()[0]
+        pinDic[row.number] = dict(res)
+        pinDic[row.number]["name"] = row.name
+        pinDic[row.number]["position"] = pos
+        pinDic[row.number]["number"] = row.number
+        pinDic[row.number]["last_update"] = str(pinDic[row.number].get("last_update"))
+
+print(json.dumps(pinDic))
 
 # creating metadata objects for each of the tables
 metadataWH = sqla.MetaData()
