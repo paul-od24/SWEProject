@@ -6,5 +6,6 @@
 /wstest.py
 /wdata.json
 /wdata.xml
+/dbtest.py
 /__pycache__/
 

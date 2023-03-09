@@ -1,32 +1,76 @@
 // define with a global scope so setPinDic and initMap can both access it
-let pinDic
+let pinDic; // object to store the pin data
+let avDic; // object to store the bike availability data
+const stations = {}; // object to store the markers
+const dublin = { lat: 53.3498, lng: -6.2603 }; // the location Dublin
+let userloc; // the user location
+let markersVisible = true; // variable to toggle marker visibility
 
 // function to get the data from the html template
 // converts the input to a string, then to a JSON object
 function setPinDic(data) {
-  pinDic = JSON.stringify(data)
-  pinDic = JSON.parse(pinDic)
+  pinDic = JSON.stringify(data);
+  pinDic = JSON.parse(pinDic);
+  for (let i in pinDic) {
+    // add bike availability information to the pin dictionary
+    pinDic[i]["available_bikes"] = avDic[i]["available_bikes"];
+    pinDic[i]["available_bike_stands"] = avDic[i]["available_bike_stands"];
+  }
 }
 
 // Initialize and add the map
 function initMap() {
-  // The location Dublin
-  const dublin = { lat: 53.3498, lng: -6.2603 };
   // The map, centered at Dublin
   const map = new google.maps.Map(document.getElementById("map"), {
     zoom: 14,
     center: dublin,
   });
 
-  // array to store the markers
-  const stations = [];
+  // Create an InfoWindow object
+  const infowindow = new google.maps.InfoWindow();
 
-  // looping through the pins and adding them to the map
-  for(let i in pinDic) {
-    stations.push(new google.maps.Marker({position: pinDic[i], map: map,}));
+  // function to show or hide the markers on the map
+  function toggleMarkers() {
+    for (let i in pinDic) {
+      const stationMarker = stations[pinDic[i]["number"]];
+      stationMarker.setVisible(markersVisible);
+    }
+    markersVisible = !markersVisible;
   }
-}
 
+  // variable that stores the location of the bike stations icon
+  var image = {
+    url: "/static/icons/bike_icon.png",
+    scaledSize: new google.maps.Size(20, 20)
+  };
+  
+  // looping through the pins and adding them to the map
+  for (let i in pinDic) {
+    const stationMarker = new google.maps.Marker({
+      position: pinDic[i]["position"],
+      map: map,
+      icon: image
+    });
+
+    // Add an event listener to show the InfoWindow when you hover over the marker
+    google.maps.event.addListener(stationMarker, "mouseover", function () {
+      infowindow.setContent(
+        `<div class="info-window"><h3>${pinDic[i]["name"]}</h3><p>Station Number: ${i}</p><p>Available Bikes: ${pinDic[i]["available_bikes"]}</p><p>Available Bike Stands: ${pinDic[i]["available_bike_stands"]}</p></div>`
+      );
+      infowindow.open(map, stationMarker);
+    });
+
+    // Hide the InfoWindow when you move away from the marker
+    google.maps.event.addListener(stationMarker, "mouseout", function () {
+      infowindow.close();
+    });
+
+    console.log("Added marker for station " + pinDic[i]["number"]); // added for debugging
+    stations[pinDic[i]["number"]] = stationMarker;
+  }
+  // call the autocomplete function
+autocomplete();
+}
 // populate current weather table
 function popWeatherCurrent(weatherDict) {
   // setup table head
@@ -133,6 +177,54 @@ function popWeatherWeek(weatherDict) {
     weather += rows[j];
   }
   document.getElementById("weather_week").innerHTML = weather;
+}
+
+function autocomplete() {
+    google.maps.event.addDomListener(window, 'load', initialize);
+}
+
+// adapted from https://developers.google.com/maps/documentation/javascript/place-autocomplete
+function initialize() {
+    let input = document.getElementById('autocomplete_search');
+    const defaultBounds = {
+    north: dublin.lat + 0.2,
+    south: dublin.lat - 0.2,
+    east: dublin.lng + 0.2,
+    west: dublin.lng - 0.2,
+    };
+    const options = {
+    bounds: defaultBounds,
+    componentRestrictions: { country: "ie" },
+    fields: ["address_components", "geometry", "icon", "name"],
+    strictBounds: false,
+  };
+
+    const autocomplete = new google.maps.places.Autocomplete(input, options);
+    autocomplete.addListener('place_changed', function () {
+        let place = autocomplete.getPlace();
+        userloc = JSON.stringify({"lat":place.geometry['location'].lat(), "lng": place.geometry['location'].lng()});
+        document.getElementById("debug").innerHTML = userloc;
+    });
+}
+
+function sendLoc() {
+  fetch(`${window.origin}`, {
+    method: "POST",
+    credentials: "include",
+    body: userloc,
+    cache: "no-cache",
+    headers: new Headers({
+      "content-type": "application/json"
+    })
+  })
+  .then((response) => response.json())
+  .then((data) => showClosest(data));
+
+}
+
+function showClosest(data) {
+  n = data["number"].toString()
+  document.getElementById("debug").innerHTML = "Closest station: " + pinDic[n]["name"] + "<br>" + "Distance: " + data["distance"] + " metres";
 }
 
 window.initMap = initMap;
