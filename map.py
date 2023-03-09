@@ -22,26 +22,25 @@ station = sqla.Table("station", metadataS,
 metadataS = sqla.MetaData()
 # creating table object for availability table
 availability = sqla.Table("availability", metadataS,
-                     autoload_with=engine,
-                     schema='dbikes'
-                     )
+                          autoload_with=engine,
+                          schema='dbikes'
+                          )
 
 stmt = select(station.c.number, station.c.name, station.c.position_lat, station.c.position_lng)
+
+stmt = '''SELECT station.number, name, position_lat, position_lng, available_bikes, available_bike_stands, last_update
+FROM station, latest_availability
+WHERE station.`number` = latest_availability.number;
+'''
 
 pinDic = {}
 
 with engine.begin() as connection:
-    for row in connection.execute(stmt):
+    for row in connection.execute(text(stmt)):
         pos = {"lat": float(row.position_lat), "lng": float(row.position_lng)}
-        # pin information
-        stmt2 = 'SELECT available_bikes, available_bike_stands, last_update FROM availability WHERE `number` = ' + str(
-            row.number) + ' ORDER BY last_update DESC LIMIT 1;'
-        res = connection.execute(text(stmt2)).mappings().all()[0]
-        pinDic[row.number] = dict(res)
-        pinDic[row.number]["name"] = row.name
-        pinDic[row.number]["position"] = pos
-        pinDic[row.number]["number"] = row.number
-        pinDic[row.number]["last_update"] = str(pinDic[row.number].get("last_update"))
+        pinDic[row.number] = {"number": row.number, "name": row.name, "position": pos,
+                              "available_bikes": row.available_bikes,
+                              "available_bike_stands": row.available_bike_stands, "last_update": str(row.last_update)}
 
 print(json.dumps(pinDic))
 
@@ -67,11 +66,11 @@ wCur = {}
 stmt = "SELECT * FROM weather_historical ORDER BY `time` DESC LIMIT 1"
 # executing sql statment
 with engine.begin() as connection:
-        res = connection.execute(text(stmt))
-        res = res.mappings().all()
-        res = res[0]
-        data = {"symbol": res.symbol, "rain": res.rain}
-        wCur = data
+    res = connection.execute(text(stmt))
+    res = res.mappings().all()
+    res = res[0]
+    data = {"symbol": res.symbol, "rain": res.rain}
+    wCur = data
 
 # preparing sql statement to get current weather
 stmt = select(weather_forecast.c.end, weather_forecast.c.symbol, weather_forecast.c.rain_hourly)
@@ -92,6 +91,7 @@ app = Flask(__name__, template_folder="./templates")
 def mapview():
     return render_template('index.html', dic=json.dumps(pinDic), mapkey=apilogin.MAPKEY, wCur=json.dumps(wCur),
                            wetDic=json.dumps(wetDic))
+
 
 # function taking a location from the webpage and checking for the closest station
 @app.route("/", methods=["post"])

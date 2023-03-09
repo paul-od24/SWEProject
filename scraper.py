@@ -16,6 +16,7 @@ engine = create_engine(
 # creating metadata objects for each of the tables
 metadataS = sqla.MetaData()
 metadataA = sqla.MetaData()
+metadataLA = sqla.MetaData()
 
 # creating table object for station table
 station = sqla.Table("station", metadataS,
@@ -29,6 +30,13 @@ availability = sqla.Table("availability", metadataA,
                           schema='dbikes'
                           )
 
+# creating table object for latest availability table
+latest_availability = sqla.Table("latest_availability", metadataLA,
+                          autoload_with=engine,
+                          schema='dbikes'
+                          )
+
+
 # API parameters (apilogin is a separate py file)
 APIKEY = apilogin.APIKEY
 NAME = 'Dublin'
@@ -40,7 +48,6 @@ def write_to_db(text):
     data = json.loads(text)
     # starting transaction
     with engine.begin() as connection:
-
         vals = tuple(map(fix_data, data))
         # preparing statement station insert
         stmt = insert(station)
@@ -57,6 +64,13 @@ def write_to_db(text):
             number=stmt.inserted.number)
         # executing insert operations for availability
         connection.execute(odk_stmt, vals)
+
+        # statement to update the latest availability table
+        stmt = insert(latest_availability)
+        latest_stmt = stmt.on_duplicate_key_update(available_bikes=stmt.inserted.available_bikes,
+                                                   available_bike_stands=stmt.inserted.available_bike_stands,
+                                                   last_update=stmt.inserted.last_update)
+        connection.execute(latest_stmt, vals)
 
 
 # function to "fix" data so it can be processed in the db without issues
