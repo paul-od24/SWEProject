@@ -53,7 +53,9 @@ stmt = "SELECT * FROM weather_historical ORDER BY `time` DESC LIMIT 1"
 # executing sql statment
 with engine.begin() as connection:
         res = connection.execute(text(stmt))
+        # map results to an array of dictionarys
         res = res.mappings().all()
+        # access first dictionary
         res = res[0]
         data = {"symbol": res.symbol, "rain": res.rain}
         wCur = data
