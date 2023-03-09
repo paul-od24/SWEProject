@@ -90,11 +90,11 @@ wCur = {}
 stmt = "SELECT * FROM weather_historical ORDER BY `time` DESC LIMIT 1"
 # executing sql statment
 with engine.begin() as connection:
-    res = connection.execute(text(stmt))
-    res = res.mappings().all()
-    res = res[0]
-    data = {"symbol": res.symbol, "rain": res.rain}
-    wCur = data
+        res = connection.execute(text(stmt))
+        res = res.mappings().all()
+        res = res[0]
+        data = {"symbol": res.symbol, "rain": res.rain}
+        wCur = data
 
 # preparing sql statement to get current weather
 stmt = select(weather_forecast.c.end, weather_forecast.c.symbol, weather_forecast.c.rain_hourly)
