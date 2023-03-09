@@ -1,6 +1,59 @@
+#main_div {
+  display: flex;
+}
+
 
 #map {
   height: 90vh;
-  width: 100%;
+  width: 70%;
 
+}
+
+#weather {
+  width: 20%;
+}
+
+
+#button-id {
+  width : 50px;
+  height: 20px;
+  background-color: black;
+  color: white;
+
+}
+
+/* Popup styling */
+.info-window {
+  background-color: #1d1d1d;
+  color: #fff;
+  padding: 10px;
+  width: 200px;
+  max-width: 100%;
+  font-family: Arial, Helvetica, sans-serif;
+  border-radius: 5px;
+}
+
+.info-window h3 {
+  font-size: 16px;
+  margin-top: 0;
+}
+
+.info-window p {
+  margin-bottom: 0;
+}
+
+.info-window .status {
+  font-weight: bold;
+}
+
+.info-window .bikes {
+  color: #ffd700;
+}
+
+.info-window .stands {
+  color: #c0c0c0;
+}
+
+.hidden-marker {
+  display: none;
 }

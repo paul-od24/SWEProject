@@ -127,3 +127,19 @@ try:
         print(res.fetchall())
 except Exception as e:
     print(e)  # traceback.format_exc())
+
+# preparing sql statement to add symbol column to weather tables
+sql = """
+ALTER TABLE weather_historical
+ADD symbol VARCHAR(256);
+ALTER TABLE weather_forecast
+ADD symbol VARCHAR(256);
+"""
+
+# adding symbol column to weather tables
+try:
+    with engine.begin() as connection:
+        res = connection.execute(text(sql))
+        print(res.fetchall())
+except Exception as e:
+    print(e)  # traceback.format_exc())

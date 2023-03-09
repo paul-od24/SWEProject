@@ -1,22 +1,46 @@
-<!--adapted from -->
+<!--adapted from https://developers.google.com/maps/documentation/javascript/adding-a-google-map -->
 <!DOCTYPE html>
 <html>
   <head>
-    <title>dbikes23</title>
+    <title>dbikes23</title> <button onclick="toggleMarkers()">Toggle markers</button>
     <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
     <link rel="stylesheet" type="text/css" href="../static/css/style.css" />
     <script type="text/javascript" src="../static/js/index.js"></script>
     <script>
       setPinDic({{ dic|safe }})
+      setAvDic({{ av_dic|safe }})
     </script>
   </head>
   <body>
     <h3>dbikes23 demo</h3>
-    <div id="map"></div>
+    <div id="main_div">
+      <div id="map"></div>
+      <div id="weather">
+        <table id="weather_cur">
+        </table>
+        <div style="overflow-x:auto;">
+          <table id="weather_48">
+          </table>
+        </div>
+        <div style="overflow-x:auto;">
+          <table id="weather_week">
+          </table>
+        </div>
+      </div>
+    </div>
     <script
-      src="https://maps.googleapis.com/maps/api/js?key={{mapkey}}&callback=initMap&v=weekly"
+      src="https://maps.googleapis.com/maps/api/js?key={{mapkey}}&libraries=places&callback=initMap&v=weekly"
       defer
     >
     </script>
+    <script>
+      popWeatherCurrent({{wCur|safe}});
+      popWeather48({{wetDic|safe}});
+      popWeatherWeek({{wetDic|safe}});
+    </script>
+
+    <input id="autocomplete_search" type="text" size="50" style="margin-bottom: 50px">
+    <button type = button onclick="sendLoc()">Find closest station</button>
+    <div id = "debug"></div>
   </body>
 </html>
