@@ -15,14 +15,14 @@ engine = create_engine(
 metadataS = sqla.MetaData()
 # creating table object for station table
 station = sqla.Table("station", metadataS,
-                     autoload_with=engine,
+                     autoload=engine,
                      schema='dbikes'
                      )
 
 metadataS = sqla.MetaData()
 # creating table object for availability table
 availability = sqla.Table("availability", metadataS,
-                     autoload_with=engine,
+                     autoload=engine,
                      schema='dbikes'
                      )
 
@@ -36,7 +36,20 @@ stmt = select(
 ).select_from(station.join(availability, station.c.number == availability.c.number)).order_by(station.c.number)
 
 # pin information
-stmt2 = select([station.c.number, station.c.name, station.c.position_lat, station.c.position_lng,text('a.available_bikes'), text('a.available_bike_stands')]).select_from(station).join(text('(SELECT * FROM availability a1 ORDER BY a1.last_update DESC) a'), text('a.number = station.number')).group_by(station.c.number)
+stmt2 = select([
+    station.c.number, 
+    station.c.name, 
+    station.c.position_lat, 
+    station.c.position_lng,
+    availability.c.available_bikes,
+    availability.c.available_bike_stands
+]).select_from(
+    station.join(
+        availability, 
+        station.c.number == availability.c.number
+    )
+).order_by(station.c.number)
+
 
 pinDic = {}
 avDic = {}
@@ -52,7 +65,7 @@ with engine.begin() as connection:
         pos = {"lat": float(row.position_lat), "lng": float(row.position_lng)}
         pinDic[row.number] = {"name": row.name, "number": row.number, "position": pos, "available_bikes": row.available_bikes, "available_bike_stands": row.available_bike_stands}
 #print(pinDic)
-print(json.dumps(avDic))
+#print(json.dumps(avDic))
 
 # creating metadata objects for each of the tables
 metadataWH = sqla.MetaData()
@@ -60,14 +73,15 @@ metadataWF = sqla.MetaData()
 
 # creating table object for weather_historical table
 weather_historical = sqla.Table("weather_historical", metadataWH,
-                                autoload_with=engine,
+                                autoload=engine,
                                 schema='dbikes'
                                 )
 
 # creating table object for weather_forecast table
 weather_forecast = sqla.Table("weather_forecast", metadataWF,
-                              autoload_with=engine,
-                              schema='dbikes'
+                              schema='dbikes',
+                              autoload=True,
+                              autoload_with=engine
                               )
 
 # creating wCur dictionary
