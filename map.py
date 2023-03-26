@@ -89,13 +89,24 @@ app = Flask(__name__, template_folder="./templates")
 
 @app.route("/")
 def mapview():
+    """
+    Function returning rendered template index.html including variables needed for weather & pins
+
+    Returns:
+        object: rendered flask template
+    """
     return render_template('index.html', dic=json.dumps(pinDic), mapkey=apilogin.MAPKEY, wCur=json.dumps(wCur),
                            wetDic=json.dumps(wetDic))
 
 
-# function taking a location from the webpage and checking for the closest station
 @app.route("/", methods=["post"])
 def findClosest():
+    """
+    Function taking a location from the webpage and checking for the closest station.
+
+    Returns:
+        dict: Dictionary containing number of and distance to closest station.
+    """
     userloc = dict(request.get_json())
     userloc = (userloc["lat"], userloc["lng"])
     mindist = -1
