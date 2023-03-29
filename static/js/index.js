@@ -1,6 +1,5 @@
 // define with a global scope so setPinDic and initMap can both access it
 let pinDic; // object to store the pin data
-let avDic; // object to store the bike availability data
 const stations = {}; // object to store the markers
 const dublin = {lat: 53.3498, lng: -6.2603}; // the location Dublin
 let userloc; // the user location

@@ -26,24 +26,6 @@ availability = sqla.Table("availability", metadataS,
                           schema='dbikes'
                           )
 
-stmt = select(station.c.number, station.c.name, station.c.position_lat, station.c.position_lng)
-
-stmt = '''SELECT station.number, name, position_lat, position_lng, available_bikes, available_bike_stands, last_update
-FROM station, latest_availability
-WHERE station.`number` = latest_availability.number;
-'''
-
-pinDic = {}
-
-with engine.begin() as connection:
-    for row in connection.execute(text(stmt)):
-        pos = {"lat": float(row.position_lat), "lng": float(row.position_lng)}
-        pinDic[row.number] = {"number": row.number, "name": row.name, "position": pos,
-                              "available_bikes": row.available_bikes,
-                              "available_bike_stands": row.available_bike_stands, "last_update": str(row.last_update)}
-
-print(json.dumps(pinDic))
-
 # creating metadata objects for each of the tables
 metadataWH = sqla.MetaData()
 metadataWF = sqla.MetaData()
@@ -60,31 +42,55 @@ weather_forecast = sqla.Table("weather_forecast", metadataWF,
                               schema='dbikes'
                               )
 
-# creating wCur dictionary
+pinDic = {}
 wCur = {}
-# prpearing sql statement to get current weather
-stmt = "SELECT * FROM weather_historical ORDER BY `time` DESC LIMIT 1"
-# executing sql statment
-with engine.begin() as connection:
-    res = connection.execute(text(stmt))
-    res = res.mappings().all()
-    res = res[0]
-    data = {"symbol": res.symbol, "rain": res.rain}
-    wCur = data
-
-# preparing sql statement to get current weather
-stmt = select(weather_forecast.c.end, weather_forecast.c.symbol, weather_forecast.c.rain_hourly)
-
-# creating weather forecast dictionary
 wetDic = {}
 
-# executing sql statement
-with engine.begin() as connection:
-    for row in connection.execute(stmt):
-        data = {"symbol": row.symbol, "rain": row.rain_hourly}
-        wetDic[str(row.end)] = data
-
 app = Flask(__name__, template_folder="./templates")
+
+
+def update_data():
+    """
+    Function that gets the latest bike and weather data and stores it in the appropriate dictionaries.
+
+    Returns: void
+    """
+    # sql statement to select bike data
+    stmt = '''SELECT station.number, name, position_lat, position_lng, available_bikes, available_bike_stands, last_update
+    FROM station, latest_availability
+    WHERE station.`number` = latest_availability.number;
+    '''
+
+    global pinDic
+    global wCur
+    global wetDic
+
+    with engine.begin() as connection:
+        for row in connection.execute(text(stmt)):
+            pos = {"lat": float(row.position_lat), "lng": float(row.position_lng)}
+            pinDic[row.number] = {"number": row.number, "name": row.name, "position": pos,
+                                  "available_bikes": row.available_bikes,
+                                  "available_bike_stands": row.available_bike_stands,
+                                  "last_update": str(row.last_update)}
+
+    # preparing sql statement to get current weather
+    stmt = "SELECT * FROM weather_historical ORDER BY `time` DESC LIMIT 1"
+    # executing sql statement
+    with engine.begin() as connection:
+        res = connection.execute(text(stmt))
+        res = res.mappings().all()
+        res = res[0]
+        data = {"symbol": res.symbol, "rain": res.rain}
+        wCur = data
+
+    # preparing sql statement to get current weather
+    stmt = select(weather_forecast.c.end, weather_forecast.c.symbol, weather_forecast.c.rain_hourly)
+
+    # executing sql statement
+    with engine.begin() as connection:
+        for row in connection.execute(stmt):
+            data = {"symbol": row.symbol, "rain": row.rain_hourly}
+            wetDic[str(row.end)] = data
 
 
 @app.route("/")
@@ -95,6 +101,7 @@ def mapview():
     Returns:
         object: rendered flask template
     """
+    update_data()
     return render_template('index.html', dic=json.dumps(pinDic), mapkey=apilogin.MAPKEY, wCur=json.dumps(wCur),
                            wetDic=json.dumps(wetDic))
 
