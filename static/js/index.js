@@ -202,23 +202,26 @@ function initialize() {
 
 // function to get the user's current location
 function currentLoc() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                userloc = {
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude,
-                }
-            })
-    }
+    return new Promise((resolve) => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    userloc = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude,
+                    }
+                    resolve(userloc)
+                })
+        }
+    });
 }
 
 // function using POST request to send selected location to backend. Backend responds with closest station.
-function sendLoc() {
+async function sendLoc() {
 
     // get current location if no place selected
     if (userloc === undefined) {
-        currentLoc()
+        await currentLoc()
     }
 
     fetch(`${window.origin}`, {
@@ -237,57 +240,57 @@ function sendLoc() {
 
 // function to find route distances
 function findRoute(origin, dest) {
-  return new Promise((resolve, reject) => {
-    let mode = document.getElementById("mode").value;
-    let req = {
-      origin: origin,
-      destination: dest,
-      travelMode: mode,
-    };
+    return new Promise((resolve, reject) => {
+        let mode = document.getElementById("mode").value;
+        let req = {
+            origin: origin,
+            destination: dest,
+            travelMode: mode,
+        };
 
-    directionsService.route(req, function (res, status) {
-      if (status === "OK") {
-        let dist = res.routes[0].legs[0].distance.value;
-        resolve(dist);
-      } else {
-        reject("Error getting route:", status);
-      }
+        directionsService.route(req, function (res, status) {
+            if (status === "OK") {
+                let dist = res.routes[0].legs[0].distance.value;
+                resolve(dist);
+            } else {
+                reject("Error getting route:", status);
+            }
+        });
     });
-  });
 }
 
 // function to show the closest station based on route distance
 async function showClosest(data) {
-  let min_dist = { number: "0", distance: -1 };
-  let final_dest;
-  let dist;
+    let min_dist = {number: "0", distance: -1};
+    let final_dest;
+    let dist;
 
-  for (let i in data) {
-    let n = i.toString();
-    let dest = {
-      lat: pinDic[n]["position"]["lat"],
-      lng: pinDic[n]["position"]["lng"],
-    };
+    for (let i in data) {
+        let n = i.toString();
+        let dest = {
+            lat: pinDic[n]["position"]["lat"],
+            lng: pinDic[n]["position"]["lng"],
+        };
 
-    try {
-      dist = await findRoute(userloc, dest);
+        try {
+            dist = await findRoute(userloc, dest);
 
-      if (min_dist["distance"] === -1 || dist < min_dist["distance"]) {
-        min_dist["number"] = n;
-        min_dist["distance"] = dist;
-        final_dest = dest;
-      }
-    } catch (error) {
-      console.error(error);
+            if (min_dist["distance"] === -1 || dist < min_dist["distance"]) {
+                min_dist["number"] = n;
+                min_dist["distance"] = dist;
+                final_dest = dest;
+            }
+        } catch (error) {
+            console.error(error);
+        }
     }
-  }
 
-  let n = min_dist["number"];
-  document.getElementById("station").innerHTML =
-    "Closest station: " + pinDic[n]["name"];
-  let stationInfo = pinDic[n]["name"] + " Station Number: " + pinDic[n]["number"] + ", Available Bikes: " + pinDic[n]["available_bikes"] + ", Available Bike Stands: " + pinDic[n]["available_bike_stands"];
-  document.getElementById("station").innerHTML = "Closest station: " + stationInfo;
-  showRoute(userloc, final_dest);
+    let n = min_dist["number"];
+    document.getElementById("station").innerHTML =
+        "Closest station: " + pinDic[n]["name"];
+    let stationInfo = pinDic[n]["name"] + " Station Number: " + pinDic[n]["number"] + ", Available Bikes: " + pinDic[n]["available_bikes"] + ", Available Bike Stands: " + pinDic[n]["available_bike_stands"];
+    document.getElementById("station").innerHTML = "Closest station: " + stationInfo;
+    showRoute(userloc, final_dest);
 }
 
 // function to actually display the route on the map
@@ -318,9 +321,9 @@ function showRoute(origin, dest) {
 const dateTime = document.getElementById("datetime");
 
 // Get the value of the selected date and time
-dateTime.addEventListener("change", function() {
-  const selectedDateTime = dateTime.value;
-  console.log(selectedDateTime);
+dateTime.addEventListener("change", function () {
+    const selectedDateTime = dateTime.value;
+    console.log(selectedDateTime);
 });
 
 window.initMap = initMap;
