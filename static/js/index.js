@@ -29,15 +29,7 @@ function initMap() {
 
     // Create an InfoWindow object
     const infowindow = new google.maps.InfoWindow();
-
-    // function to show or hide the markers on the map
-    function toggleMarkers() {
-        for (let i in pinDic) {
-            const stationMarker = stations[pinDic[i]["number"]];
-            stationMarker.setVisible(markersVisible);
-        }
-        markersVisible = !markersVisible;
-    }
+    
 
     // variable that stores the location of the bike stations icon
     var image = {

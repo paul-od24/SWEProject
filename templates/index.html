@@ -8,13 +8,20 @@
     <script type="text/javascript" src="../static/js/index.js"></script>
     <script>
       setPinDic({{ dic|safe }})
+  function toggleMarkers() {
+     for (let i in pinDic) {
+      const stationMarker = stations[pinDic[i]["number"]];
+      stationMarker.setVisible(markersVisible);
+    }
+    markersVisible = !markersVisible;
+  }
     </script>
   </head>
   <body>
     <div id="header">
       <h2>DBIKES23 - A real-time Dublin bike availability map </h2>
+    <button onclick="toggleMarkers()">Toggle Markers</button>
     </div>
-    <button onclick="toggleMarkers()">Toggle markers</button>
     <div id="main_div">
       <div id="map"></div>
       <div id="weather">
