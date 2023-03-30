@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>dbikes23</title> <button onclick="toggleMarkers()">Toggle markers</button>
+    <title>dbikes23</title> 
     <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
     <link rel="stylesheet" type="text/css" href="../static/css/style.css" />
     <script type="text/javascript" src="../static/js/index.js"></script>
@@ -11,7 +11,10 @@
     </script>
   </head>
   <body>
-    <h3>dbikes23 demo</h3>
+    <div id="header">
+      <h2>DBIKES23 - A real-time Dublin bike availability map </h2>
+    </div>
+    <button onclick="toggleMarkers()">Toggle markers</button>
     <div id="main_div">
       <div id="map"></div>
       <div id="weather">
@@ -25,7 +28,13 @@
           <table id="weather_week">
           </table>
         </div>
+        </div>
       </div>
+      <div>
+        <label for="datetime">Select a date and time:</label>
+        <input type="datetime-local" id="datetime" name="datetime">
+      </div>
+    </div>
     </div>
     <script
       src="https://maps.googleapis.com/maps/api/js?key={{mapkey}}&libraries=places&callback=initMap&v=weekly"
@@ -48,9 +57,9 @@
         <option value="TRANSIT">Public Transport</option>
       </select>
     </div>
-    <button type = button onclick="sendLoc()">Find closest station</button>
+    <button type="button" onclick="sendLoc()">Find closest station</button>
 
-    <div id = "station"></div>
-    <div id = "route"></div>
+    <div id="station"></div>
+    <div id="route"></div>
   </body>
 </html>

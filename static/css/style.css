@@ -1,7 +1,10 @@
 #main_div {
   display: flex;
 }
-
+body {
+  background-color: black;
+  color: white;
+}
 
 #map {
   height: 90vh;
@@ -10,7 +13,7 @@
 }
 
 #weather {
-  width: 20%;
+  width: 40%;
 }
 
 
@@ -56,4 +59,48 @@
 
 .hidden-marker {
   display: none;
+}
+
+table {
+  border-collapse: collapse;
+  margin-bottom: 1em;
+  border: 1px solid black;
+  color: black;
+  background-color: white;
+}
+td, th {
+  padding: 0.5em;
+  text-align: center;
+  border: 1px solid black;
+}
+
+th {
+  background-color: #b8860b;
+  color: white;
+}
+
+#weather_key {
+  border: 1px solid black;
+  background-color: #f2f2f2;
+  padding: 1em;
+  margin-bottom: 1em;
+}
+
+#header {
+  text-align: center;
+  background-color: black;
+  padding: 10px;
+}
+
+#header h2 {
+  color: white;
+  font-size: 2em;
+  margin: 0;
+}
+
+#header p {
+  color: white;
+  font-size: 1.2em;
+  margin: 0;
+  margin-top: 10px;
 }

@@ -274,4 +274,12 @@ function findRoute(origin, dest) {
     });
 }
 
+const dateTime = document.getElementById("datetime");
+
+// Get the value of the selected date and time
+dateTime.addEventListener("change", function() {
+  const selectedDateTime = dateTime.value;
+  console.log(selectedDateTime);
+});
+
 window.initMap = initMap;
