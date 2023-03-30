@@ -285,6 +285,8 @@ async function showClosest(data) {
   let n = min_dist["number"];
   document.getElementById("station").innerHTML =
     "Closest station: " + pinDic[n]["name"];
+  let stationInfo = pinDic[n]["name"] + " Station Number: " + pinDic[n]["number"] + ", Available Bikes: " + pinDic[n]["available_bikes"] + ", Available Bike Stands: " + pinDic[n]["available_bike_stands"];
+  document.getElementById("station").innerHTML = "Closest station: " + stationInfo;
   showRoute(userloc, final_dest);
 }
 
