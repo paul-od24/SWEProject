@@ -247,7 +247,8 @@ function sendLoc() {
 function showClosest(data) {
     let n = data["number"].toString()
     let dest = {"lat": pinDic[n]["position"]["lat"], "lng": pinDic[n]["position"]["lng"]}
-    document.getElementById("station").innerHTML = "Closest station: " + pinDic[n]["name"];
+    let stationInfo = pinDic[n]["name"] + " Station Number: " + pinDic[n]["number"] + ", Available Bikes: " + pinDic[n]["available_bikes"] + ", Available Bike Stands: " + pinDic[n]["available_bike_stands"];
+    document.getElementById("station").innerHTML = "Closest station: " + stationInfo;
     findRoute(userloc, dest)
 }
 
