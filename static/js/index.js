@@ -29,7 +29,7 @@ function initMap() {
 
     // Create an InfoWindow object
     const infowindow = new google.maps.InfoWindow();
-    
+
 
     // variable that stores the location of the bike stations icon
     var image = {
@@ -217,7 +217,7 @@ function currentLoc() {
 function sendLoc() {
 
     // get current location if no place selected
-    if(userloc===undefined) {
+    if (userloc === undefined) {
         currentLoc()
     }
 
@@ -235,17 +235,63 @@ function sendLoc() {
 
 }
 
-// function to display closest station on page
-function showClosest(data) {
-    let n = data["number"].toString()
-    let dest = {"lat": pinDic[n]["position"]["lat"], "lng": pinDic[n]["position"]["lng"]}
-    let stationInfo = pinDic[n]["name"] + " Station Number: " + pinDic[n]["number"] + ", Available Bikes: " + pinDic[n]["available_bikes"] + ", Available Bike Stands: " + pinDic[n]["available_bike_stands"];
-    document.getElementById("station").innerHTML = "Closest station: " + stationInfo;
-    findRoute(userloc, dest)
+// function to find route distances
+function findRoute(origin, dest) {
+  return new Promise((resolve, reject) => {
+    let mode = document.getElementById("mode").value;
+    let req = {
+      origin: origin,
+      destination: dest,
+      travelMode: mode,
+    };
+
+    directionsService.route(req, function (res, status) {
+      if (status === "OK") {
+        let dist = res.routes[0].legs[0].distance.value;
+        resolve(dist);
+      } else {
+        reject("Error getting route:", status);
+      }
+    });
+  });
 }
 
-// function to find route between selected location and closest station
-function findRoute(origin, dest) {
+// function to show the closest station based on route distance
+async function showClosest(data) {
+  let min_dist = { number: "0", distance: -1 };
+  let final_dest;
+  let dist;
+
+  for (let i in data) {
+    let n = i.toString();
+    let dest = {
+      lat: pinDic[n]["position"]["lat"],
+      lng: pinDic[n]["position"]["lng"],
+    };
+
+    try {
+      dist = await findRoute(userloc, dest);
+
+      if (min_dist["distance"] === -1 || dist < min_dist["distance"]) {
+        min_dist["number"] = n;
+        min_dist["distance"] = dist;
+        final_dest = dest;
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  let n = min_dist["number"];
+  document.getElementById("station").innerHTML =
+    "Closest station: " + pinDic[n]["name"];
+  showRoute(userloc, final_dest);
+}
+
+// function to actually display the route on the map
+function showRoute(origin, dest) {
+    let dist
+    let dur
     let mode = document.getElementById('mode').value;
     let req = {
         origin: origin,
@@ -256,8 +302,8 @@ function findRoute(origin, dest) {
     directionsService.route(req, function (res, status) {
         if (status === 'OK') {
             directionsRenderer.setDirections(res);
-            let dist = res.routes[0].legs[0].distance.text;
-            let dur = res.routes[0].legs[0].duration.text;
+            dist = res.routes[0].legs[0].distance.text;
+            dur = res.routes[0].legs[0].duration.text;
 
             document.getElementById("route").innerHTML = "Distance: " + dist + "<br>" + "Duration: " + dur;
 

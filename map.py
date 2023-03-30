@@ -4,6 +4,7 @@ from flask import Flask, render_template, request
 import sqlalchemy as sqla
 from sqlalchemy import create_engine, select, text
 from geopy import distance
+from itertools import islice
 import dblogin
 import apilogin
 
@@ -116,14 +117,16 @@ def findClosest():
     """
     userloc = dict(request.get_json())
     userloc = (userloc["lat"], userloc["lng"])
-    mindist = -1
-    closest = {"failed": "failed"}
+    d_dic = {}
     for i in pinDic:
         teststation = (pinDic[i]["position"].get("lat"), pinDic[i]["position"].get("lng"))
         d = distance.distance(userloc, teststation).m
-        if mindist == -1 or d < mindist:
-            mindist = round(d, 0)
-            closest = {"number": i, "distance": mindist}
+        d_dic[i] = d
+    d_dic_sorted = dict(sorted(d_dic.items(), key=lambda item: item[1]))
+
+    closest = dict(islice(d_dic_sorted.items(), 5))
+    print(closest)
+
     return closest
 
 
