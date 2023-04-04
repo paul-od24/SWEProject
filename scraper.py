@@ -78,7 +78,7 @@ def toirish(utc):
     from_zone = tz.tzutc()
     utc = utc.replace(tzinfo=from_zone)
     # define timezone to convert time to
-    to_zone = tz.gettz('Ireland/Dublin')
+    to_zone = tz.gettz('Europe/Dublin')
     return utc.astimezone(to_zone)
 
 
