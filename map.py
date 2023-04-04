@@ -81,7 +81,7 @@ def update_data():
         res = connection.execute(text(stmt))
         res = res.mappings().all()
         res = res[0]
-        data = {"symbol": res.symbol, "rain": res.rain}
+        data = {"symbol": res.symbol, "rain": res.rain, "temp":res.temp}
         wCur = data
 
     # preparing sql statement to get current weather

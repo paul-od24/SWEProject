@@ -69,8 +69,12 @@ function initMap() {
 function popWeatherCurrent(weatherDict) {
     // setup table head
     let weather = '<th colspan="';
-    weather += "2";
+    weather += "3";
     weather += '">Current Weather</th>';
+    // add row
+    weather += '<tr><td>Weather';
+    // add symbol to row
+    weather += '</td><td>Precipitation</td><td>Temperature</td>';
     // add row
     weather += '<tr><td>';
     // add symbol to row
@@ -78,6 +82,9 @@ function popWeatherCurrent(weatherDict) {
     weather += '</td><td>';
     // add rain to row
     weather += weatherDict["rain"];
+    weather += '</td><td>';
+    // add temp to row
+    weather += weatherDict["temp"];
     // end row
     weather += '</td></tr>';
     // insert table into html
