@@ -20,9 +20,9 @@ station = sqla.Table("station", metadataS,
                      schema='dbikes'
                      )
 
-metadataS = sqla.MetaData()
+metadataA = sqla.MetaData()
 # creating table object for availability table
-availability = sqla.Table("availability", metadataS,
+availability = sqla.Table("availability", metadataA,
                           autoload_with=engine,
                           schema='dbikes'
                           )
