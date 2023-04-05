@@ -22,6 +22,8 @@ function initMap() {
         center: dublin,
     });
 
+    // set date time
+    setDateTime();
     // setting up routing
     directionsService = new google.maps.DirectionsService();
     directionsRenderer = new google.maps.DirectionsRenderer();
@@ -66,29 +68,24 @@ function initMap() {
 }
 
 // populate current weather table
-function popWeatherCurrent(weatherDict) {
-    // setup table head
-    let weather = '<th colspan="';
-    weather += "3";
-    weather += '">Current Weather</th>';
-    // add row
-    weather += '<tr><td>Weather';
-    // add symbol to row
-    weather += '</td><td>Precipitation</td><td>Temperature</td>';
-    // add row
-    weather += '<tr><td>';
-    // add symbol to row
-    weather += weatherDict["symbol"];
-    weather += '</td><td>';
-    // add rain to row
-    weather += weatherDict["rain"];
-    weather += '</td><td>';
-    // add temp to row
-    weather += weatherDict["temp"];
-    // end row
-    weather += '</td></tr>';
-    // insert table into html
-    document.getElementById("weather_cur").innerHTML = weather;
+function popWeatherCurrent(weather) {
+    // Get a reference to the current weather div
+    var currentWeatherDiv = document.getElementById("weather_cur");
+    
+    // Create a header element for the current weather
+    var currentWeatherHeader = document.createElement("h3");
+    currentWeatherHeader.innerText = "Current Weather";
+    currentWeatherDiv.appendChild(currentWeatherHeader);
+    
+    // Create a paragraph element for the weather data
+    var currentWeatherData = document.createElement("p");
+    
+    // Add precipitation and temperature data to the paragraph element
+    currentWeatherData.innerText = "Temperature: " + weather.temp + "°C\n" +
+                                    "Precipitation: " + weather.rain + "mm";
+    
+    // Add the weather data to the current weather div
+    currentWeatherDiv.appendChild(currentWeatherData);
 }
 
 // populate next 48 hours weather table
@@ -207,7 +204,6 @@ function initialize() {
     });
 }
 
-// function to get the user's current location
 function currentLoc() {
     return new Promise((resolve) => {
         if (navigator.geolocation) {
@@ -218,10 +214,39 @@ function currentLoc() {
                         lng: position.coords.longitude,
                     }
                     resolve(userloc)
+                    // get the input element
+                    const input = document.getElementById("autocomplete_search");
+                    // set the value of the input field to the current latitude and longitude
+                    input.value = `${userloc.lat},${userloc.lng}`;
                 })
         }
     });
 }
+
+// function gets the current location of the user and populates the search bar with the formatted address of that location.
+function getCurrentLocation() {
+    currentLoc().then((location) => {
+      var geocoder = new google.maps.Geocoder();
+      geocoder.geocode({
+        location: new google.maps.LatLng(location.lat, location.lng)
+      }, function (results, status) {
+        if (status == "OK") {
+          var autocomplete = new google.maps.places.Autocomplete(
+            document.getElementById("autocomplete_search"), {
+              types: ["address"]
+            }
+          );
+          autocomplete.setFields(["address_component", "geometry"]);
+          autocomplete.setBounds(results[0].geometry.viewport);
+          document.getElementById("autocomplete_search").value =
+            results[0].formatted_address;
+        } else {
+        // if the geocoder fails, log an error message to the console
+          console.log("Geocode was not successful for the following reason: " + status);
+        }
+      });
+    });
+  }
 
 // function using POST request to send selected location to backend. Backend responds with closest station.
 async function sendLoc() {
@@ -324,6 +349,11 @@ function showRoute(origin, dest) {
         }
     });
 }
+function setDateTime() {
+    const now = new Date();
+    const dateTimeInput = document.getElementById("datetime");
+    dateTimeInput.value = now.toISOString().slice(0, 16);
+  }
 
 const dateTime = document.getElementById("datetime");
 
