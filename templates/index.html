@@ -18,29 +18,38 @@
     </script>
   </head>
   <body>
-    <div id="header">
-      <h2>DBIKES23 - A real-time Dublin bike availability map </h2>
-    <button onclick="toggleMarkers()">Toggle Markers</button>
-    </div>
+    
     <div id="main_div">
       <div id="map"></div>
       <div id="weather">
+        <h2>DBIKES23 - A real-time Dublin bike availability map </h2>
+    <button onclick="toggleMarkers()">Toggle Markers</button>
         <div id="weather_cur"></div>
         <div style="overflow-x:auto;">
+          <label for="datetime">Select a date and time:</label>
+          <input type="datetime-local" id="datetime" name="datetime">
+          <div>
+            <input id="autocomplete_search" type="text" size="50" style="margin-bottom: 20px; margin-right: 20px">
+          <button type="button" onclick="getCurrentLocation()">Use Current Location</button></div>
+      <div id="travel"><label for="mode">   Travel Mode:</label>
+      <select id="mode">
+        <option value="DRIVING">Driving</option>
+        <option value="WALKING">Walking</option>
+        <option value="BICYCLING">Cycling</option>
+        <option value="TRANSIT">Public Transport</option>
+      </select><button type="button" onclick="sendLoc()">Find closest station</button>
+    </div>
+    <div id="stationInfo"></div>
+      
           <table id="weather_48">
           </table>
         </div>
         <div style="overflow-x:auto;">
           <table id="weather_week">
-          </table>
+          </table>   
         </div>
       </div>
     </div>
-    <div>
-      <label for="datetime">Select a date and time:</label>
-      <input type="datetime-local" id="datetime" name="datetime">
-    </div>
-
     <script
       src="https://maps.googleapis.com/maps/api/js?key={{mapkey}}&libraries=places&callback=initMap&v=weekly"
       defer
@@ -51,20 +60,6 @@
       popWeather48({{wetDic|safe}});
       popWeatherWeek({{wetDic|safe}});
     </script>
-
-    <input id="autocomplete_search" type="text" size="50" style="margin-bottom: 20px; margin-right: 20px">
-    <div style="display: inline-block; margin-right: 20px">
-      <button type="button" onclick="getCurrentLocation()">Use Current Location</button>
-      <label for="mode">   Travel Mode:</label>
-      <select id="mode">
-        <option value="DRIVING">Driving</option>
-        <option value="WALKING">Walking</option>
-        <option value="BICYCLING">Cycling</option>
-        <option value="TRANSIT">Public Transport</option>
-      </select>
-    </div>
-    
-    <button type="button" onclick="sendLoc()">Find closest station</button>
 
     <div id="station"></div>
     <div id="route"></div>

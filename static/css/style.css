@@ -2,12 +2,12 @@
   display: flex;
 }
 body {
-  background-color: black;
+  background-color: #13917a;
   color: white;
 }
 
 #map {
-  height: 90vh;
+  height: 100vh;
   width: 70%;
 
 }
@@ -75,7 +75,7 @@ td, th {
 }
 
 th {
-  background-color: #b8860b;
+  background-color: #13917a;
   color: white;
 }
 
@@ -88,7 +88,7 @@ th {
 
 #header {
   text-align: center;
-  background-color: black;
+  background-color: #13917a;
   padding: 10px;
 }
 
@@ -105,3 +105,13 @@ th {
   margin-top: 10px;
 }
 
+#weather_cur {
+  background-color: #13917a;
+  padding: 10px;
+  border-radius: 5px;
+  margin-top: 20px;
+  color: white;
+}
+#travel {
+  margin-bottom: 20px; /* adjust the value as needed */
+}

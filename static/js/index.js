@@ -73,16 +73,52 @@ function popWeatherCurrent(weather) {
     var currentWeatherDiv = document.getElementById("weather_cur");
     
     // Create a header element for the current weather
-    var currentWeatherHeader = document.createElement("h3");
+    var currentWeatherHeader = document.createElement("h2");
     currentWeatherHeader.innerText = "Current Weather";
     currentWeatherDiv.appendChild(currentWeatherHeader);
     
     // Create a paragraph element for the weather data
     var currentWeatherData = document.createElement("p");
     
+    // Create an image element for the weather icon
+    var weatherIcon = document.createElement("img");
+    
+    // Set the src attribute of the weather icon based on the weather symbol
+switch (weather.symbol) {
+    case "Cloud":
+        weatherIcon.src = "static/icons/cloudy.png";
+        break;
+    case "Sun":
+        weatherIcon.src = "static/icons/sunny.png";
+        break;
+    case "PartlyCloud":
+        weatherIcon.src = "static/icons/partlycloudy.png";
+        break;
+    case "DrizzleSun":
+        weatherIcon.src = "static/icons/drizzlesun.png";
+        break;
+    case "Rain":
+        weatherIcon.src = "static/icons/rain.png";
+        break;
+    case "Drizzle":
+        weatherIcon.src = "static/icons/drizzle.png";
+        break;
+    case "LightRain":
+        weatherIcon.src = "static/icons/lightrain.png";
+        break;
+    // Add more cases for each weather symbol and corresponding icon
+    default:
+        weatherIcon.src = "static/icons/default.png"; // A default icon to use if the symbol is not recognized
+        break;
+}
+    
+    // Add the weather icon to the paragraph element
+    currentWeatherData.appendChild(weatherIcon);
+    
     // Add precipitation and temperature data to the paragraph element
-    currentWeatherData.innerText = "Temperature: " + weather.temp + "°C\n" +
-                                    "Precipitation: " + weather.rain + "mm";
+  currentWeatherData.innerHTML+= "<br><span style='font-size:25px; font-weight:bold;'>Temperature:</span> " + weather.temp + "°C 🔆<br>" +
+  "<span style='font-size:25px; font-weight:bold;'>Precipitation:</span> " + weather.rain + "mm ☔";
+
     
     // Add the weather data to the current weather div
     currentWeatherDiv.appendChild(currentWeatherData);
@@ -318,10 +354,10 @@ async function showClosest(data) {
     }
 
     let n = min_dist["number"];
-    document.getElementById("station").innerHTML =
+    document.getElementById("stationInfo").innerHTML =
         "Closest station: " + pinDic[n]["name"];
-    let stationInfo = pinDic[n]["name"] + " Station Number: " + pinDic[n]["number"] + ", Available Bikes: " + pinDic[n]["available_bikes"] + ", Available Bike Stands: " + pinDic[n]["available_bike_stands"];
-    document.getElementById("station").innerHTML = "Closest station: " + stationInfo;
+    let stationInfo = pinDic[n]["name"] + " <br>Station Number: " + pinDic[n]["number"] + ", <br>Available Bikes: " + pinDic[n]["available_bikes"] + ", <br>Available Bike Stands: " + pinDic[n]["available_bike_stands"];
+    document.getElementById("stationInfo").innerHTML = "Closest station: " + stationInfo;
     showRoute(userloc, final_dest);
 }
 
