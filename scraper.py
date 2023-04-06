@@ -5,6 +5,7 @@ import apilogin
 import sqlalchemy as sqla
 from sqlalchemy import create_engine
 from sqlalchemy.dialects.mysql import insert
+from dateutil import tz
 import datetime
 import dblogin
 
@@ -32,10 +33,9 @@ availability = sqla.Table("availability", metadataA,
 
 # creating table object for latest availability table
 latest_availability = sqla.Table("latest_availability", metadataLA,
-                          autoload_with=engine,
-                          schema='dbikes'
-                          )
-
+                                 autoload_with=engine,
+                                 schema='dbikes'
+                                 )
 
 # API parameters (apilogin is a separate py file)
 APIKEY = apilogin.APIKEY
@@ -73,12 +73,21 @@ def write_to_db(text):
         connection.execute(latest_stmt, vals)
 
 
+def toirish(utc):
+    # need to declare datetime object as utc
+    from_zone = tz.tzutc()
+    utc = utc.replace(tzinfo=from_zone)
+    # define timezone to convert time to
+    to_zone = tz.gettz('Europe/Dublin')
+    return utc.astimezone(to_zone)
+
+
 # function to "fix" data so it can be processed in the db without issues
 def fix_data(data):
     data['position_lat'] = data['position']['lat']
     data['position_lng'] = data['position']['lng']
     # converting epoch time in milliseconds to date-time format
-    data['last_update'] = datetime.datetime.fromtimestamp(data['last_update'] / 1000)
+    data['last_update'] = toirish(datetime.datetime.fromtimestamp(data['last_update'] / 1000))
     return data
 
 

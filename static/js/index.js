@@ -286,12 +286,6 @@ function getCurrentLocation() {
 
 // function using POST request to send selected location to backend. Backend responds with closest station.
 async function sendLoc() {
-
-    // get current location if no place selected
-    if (userloc === undefined) {
-        await currentLoc()
-    }
-
     fetch(`${window.origin}`, {
         method: "POST",
         credentials: "include",
@@ -303,7 +297,6 @@ async function sendLoc() {
     })
         .then((response) => response.json())
         .then((data) => showClosest(data));
-
 }
 
 // function to find route distances
