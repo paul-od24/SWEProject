@@ -6,6 +6,7 @@ let userloc; // the user location
 let markersVisible = true; // variable to toggle marker visibility
 let directionsService;
 let directionsRenderer;
+let autocomplete;
 
 // function to get the data from the html template
 // converts the input to a string, then to a JSON object
@@ -64,7 +65,7 @@ function initMap() {
         stations[pinDic[i]["number"]] = stationMarker;
     }
     // call the autocomplete function
-    autocomplete();
+    autocomplete_init();
 }
 
 // populate current weather table
@@ -213,7 +214,7 @@ function popWeatherWeek(weatherDict) {
     document.getElementById("weather_week").innerHTML = weather;
 }
 
-function autocomplete() {
+function autocomplete_init() {
     google.maps.event.addDomListener(window, 'load', initialize);
 }
 
@@ -233,7 +234,7 @@ function initialize() {
         strictBounds: false,
     };
 
-    const autocomplete = new google.maps.places.Autocomplete(input, options);
+    autocomplete = new google.maps.places.Autocomplete(input, options);
     autocomplete.addListener('place_changed', function () {
         let place = autocomplete.getPlace();
         userloc = {"lat": place.geometry['location'].lat(), "lng": place.geometry['location'].lng()};
@@ -267,11 +268,6 @@ function getCurrentLocation() {
         location: new google.maps.LatLng(location.lat, location.lng)
       }, function (results, status) {
         if (status == "OK") {
-          var autocomplete = new google.maps.places.Autocomplete(
-            document.getElementById("autocomplete_search"), {
-              types: ["address"]
-            }
-          );
           autocomplete.setFields(["address_component", "geometry"]);
           autocomplete.setBounds(results[0].geometry.viewport);
           document.getElementById("autocomplete_search").value =
