@@ -371,7 +371,7 @@ function showRoute(origin, dest) {
             dist = res.routes[0].legs[0].distance.text;
             dur = res.routes[0].legs[0].duration.text;
 
-            document.getElementById("route").innerHTML = "Distance: " + dist + "<br>" + "Duration: " + dur;
+            document.getElementById("stationDuration").innerHTML = "Distance: " + dist + "<br>" + "Duration: " + dur;
 
         } else {
             console.error('Error getting route:', status);
