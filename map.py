@@ -81,7 +81,7 @@ def update_data():
         res = connection.execute(text(stmt))
         res = res.mappings().all()
         res = res[0]
-        data = {"symbol": res.symbol, "rain": res.rain, "temp":res.temp}
+        data = {"symbol": res.symbol, "rain": res.rain, "temp": res.temp}
         wCur = data
 
     # preparing sql statement to get current weather
@@ -118,17 +118,24 @@ def findClosest():
     userloc = dict(request.get_json())
     userloc = (userloc["lat"], userloc["lng"])
     d_dic = {}
+    predictions = {}
     for i in pinDic:
-        teststation = (pinDic[i]["position"].get("lat"), pinDic[i]["position"].get("lng"))
-        d = distance.distance(userloc, teststation).m
+        station = (pinDic[i]["position"].get("lat"), pinDic[i]["position"].get("lng"))
+        d = distance.distance(userloc, station).m
         d_dic[i] = d
     d_dic_sorted = dict(sorted(d_dic.items(), key=lambda item: item[1]))
+    print(d_dic_sorted)
 
-    closest = dict(islice(d_dic_sorted.items(), 5))
-    print(closest)
+    closest = dict(islice(d_dic_sorted.items(), 10))
 
-    return closest
+    for i in closest.keys():
+        # TODO call prediction function and map returned values to bikes/stands
+        bikes, stands = 42, 69
+        predictions[i] = {"dist": closest[i], "bikes": bikes, "stands": stands}
+
+    return predictions
 
 
 if __name__ == "__main__":
     app.run(debug=True)
+
