@@ -7,6 +7,7 @@ let markersVisible = true; // variable to toggle marker visibility
 let directionsService;
 let directionsRenderer;
 let autocomplete;
+let originMarker;
 
 // function to get the data from the html template
 // converts the input to a string, then to a JSON object
@@ -352,8 +353,8 @@ async function showClosest(data) {
 
 // function to actually display the route on the map
 function showRoute(origin, dest) {
-    let dist
-    let dur
+    let dist;
+    let dur;
     let mode = document.getElementById('mode').value;
     let req = {
         origin: origin,
@@ -372,24 +373,45 @@ function showRoute(origin, dest) {
 
             document.getElementById("stationDuration").innerHTML = "Distance: " + dist + "<br>" + "Duration: " + dur;
 
+            // Update the origin marker
+            updateOriginMarker(res);
         } else {
             console.error('Error getting route:', status);
         }
     });
 }
 
-function setDateTime() {
-    const now = new Date();
-    const dateTimeInput = document.getElementById("datetime");
-    dateTimeInput.value = now.toISOString().slice(0, 16);
+// function to update the origin marker for the route
+function updateOriginMarker(res) {
+    // Remove the old origin marker
+    if (originMarker) {
+        originMarker.setMap(null);
+    }
+
+    // set custom origin marker
+    let originLatLng = res.routes[0].legs[0].start_location;
+    originMarker = new google.maps.Marker({
+        position: originLatLng,
+        map: directionsRenderer.getMap(),
+        icon: {
+            url: 'static/icons/user.svg',
+            scaledSize: new google.maps.Size(40, 40)
+        }
+    });
 }
 
-const dateTime = document.getElementById("datetime");
+    function setDateTime() {
+        const now = new Date();
+        const dateTimeInput = document.getElementById("datetime");
+        dateTimeInput.value = now.toISOString().slice(0, 16);
+    }
+
+    const dateTime = document.getElementById("datetime");
 
 // Get the value of the selected date and time
-dateTime.addEventListener("change", function () {
-    const selectedDateTime = dateTime.value;
-    console.log(selectedDateTime);
-});
+    dateTime.addEventListener("change", function () {
+        const selectedDateTime = dateTime.value;
+        console.log(selectedDateTime);
+    });
 
-window.initMap = initMap;
+    window.initMap = initMap;
