@@ -9,11 +9,11 @@
     <script>
       setPinDic({{ dic|safe }})
   function toggleMarkers() {
+    markersVisible = !markersVisible;
      for (let i in pinDic) {
       const stationMarker = stations[pinDic[i]["number"]];
       stationMarker.setVisible(markersVisible);
     }
-    markersVisible = !markersVisible;
   }
     </script>
   </head>

@@ -72,55 +72,55 @@ function initMap() {
 function popWeatherCurrent(weather) {
     // Get a reference to the current weather div
     var currentWeatherDiv = document.getElementById("weather_cur");
-    
+
     // Create a header element for the current weather
     var currentWeatherHeader = document.createElement("h2");
     currentWeatherHeader.innerText = "Current Weather";
     currentWeatherDiv.appendChild(currentWeatherHeader);
-    
+
     // Create a paragraph element for the weather data
     var currentWeatherData = document.createElement("p");
-    
+
     // Create an image element for the weather icon
     var weatherIcon = document.createElement("img");
-    
+
     // Set the src attribute of the weather icon based on the weather symbol
-switch (weather.symbol) {
-    case "Cloud":
-        weatherIcon.src = "static/icons/cloudy.png";
-        break;
-    case "Sun":
-        weatherIcon.src = "static/icons/sunny.png";
-        break;
-    case "PartlyCloud":
-        weatherIcon.src = "static/icons/partlycloudy.png";
-        break;
-    case "DrizzleSun":
-        weatherIcon.src = "static/icons/drizzlesun.png";
-        break;
-    case "Rain":
-        weatherIcon.src = "static/icons/rain.png";
-        break;
-    case "Drizzle":
-        weatherIcon.src = "static/icons/drizzle.png";
-        break;
-    case "LightRain":
-        weatherIcon.src = "static/icons/lightrain.png";
-        break;
-    // Add more cases for each weather symbol and corresponding icon
-    default:
-        weatherIcon.src = "static/icons/default.png"; // A default icon to use if the symbol is not recognized
-        break;
-}
-    
+    switch (weather.symbol) {
+        case "Cloud":
+            weatherIcon.src = "static/icons/cloudy.png";
+            break;
+        case "Sun":
+            weatherIcon.src = "static/icons/sunny.png";
+            break;
+        case "PartlyCloud":
+            weatherIcon.src = "static/icons/partlycloudy.png";
+            break;
+        case "DrizzleSun":
+            weatherIcon.src = "static/icons/drizzlesun.png";
+            break;
+        case "Rain":
+            weatherIcon.src = "static/icons/rain.png";
+            break;
+        case "Drizzle":
+            weatherIcon.src = "static/icons/drizzle.png";
+            break;
+        case "LightRain":
+            weatherIcon.src = "static/icons/lightrain.png";
+            break;
+        // Add more cases for each weather symbol and corresponding icon
+        default:
+            weatherIcon.src = "static/icons/default.png"; // A default icon to use if the symbol is not recognized
+            break;
+    }
+
     // Add the weather icon to the paragraph element
     currentWeatherData.appendChild(weatherIcon);
-    
-    // Add precipitation and temperature data to the paragraph element
-  currentWeatherData.innerHTML+= "<br><span style='font-size:25px; font-weight:bold;'>Temperature:</span> " + weather.temp + "°C 🔆<br>" +
-  "<span style='font-size:25px; font-weight:bold;'>Precipitation:</span> " + weather.rain + "mm ☔";
 
-    
+    // Add precipitation and temperature data to the paragraph element
+    currentWeatherData.innerHTML += "<br><span style='font-size:25px; font-weight:bold;'>Temperature:</span> " + weather.temp + "°C 🔆<br>" +
+        "<span style='font-size:25px; font-weight:bold;'>Precipitation:</span> " + weather.rain + "mm ☔";
+
+
     // Add the weather data to the current weather div
     currentWeatherDiv.appendChild(currentWeatherData);
 }
@@ -263,22 +263,22 @@ function currentLoc() {
 // function gets the current location of the user and populates the search bar with the formatted address of that location.
 function getCurrentLocation() {
     currentLoc().then((location) => {
-      var geocoder = new google.maps.Geocoder();
-      geocoder.geocode({
-        location: new google.maps.LatLng(location.lat, location.lng)
-      }, function (results, status) {
-        if (status == "OK") {
-          autocomplete.setFields(["address_component", "geometry"]);
-          autocomplete.setBounds(results[0].geometry.viewport);
-          document.getElementById("autocomplete_search").value =
-            results[0].formatted_address;
-        } else {
-        // if the geocoder fails, log an error message to the console
-          console.log("Geocode was not successful for the following reason: " + status);
-        }
-      });
+        var geocoder = new google.maps.Geocoder();
+        geocoder.geocode({
+            location: new google.maps.LatLng(location.lat, location.lng)
+        }, function (results, status) {
+            if (status == "OK") {
+                autocomplete.setFields(["address_component", "geometry"]);
+                autocomplete.setBounds(results[0].geometry.viewport);
+                document.getElementById("autocomplete_search").value =
+                    results[0].formatted_address;
+            } else {
+                // if the geocoder fails, log an error message to the console
+                console.log("Geocode was not successful for the following reason: " + status);
+            }
+        });
     });
-  }
+}
 
 // function using POST request to send selected location to backend. Backend responds with closest station.
 async function sendLoc() {
@@ -363,6 +363,9 @@ function showRoute(origin, dest) {
 
     directionsService.route(req, function (res, status) {
         if (status === 'OK') {
+            directionsRenderer.setOptions({
+                suppressMarkers: true
+            });
             directionsRenderer.setDirections(res);
             dist = res.routes[0].legs[0].distance.text;
             dur = res.routes[0].legs[0].duration.text;
@@ -374,11 +377,12 @@ function showRoute(origin, dest) {
         }
     });
 }
+
 function setDateTime() {
     const now = new Date();
     const dateTimeInput = document.getElementById("datetime");
     dateTimeInput.value = now.toISOString().slice(0, 16);
-  }
+}
 
 const dateTime = document.getElementById("datetime");
 
