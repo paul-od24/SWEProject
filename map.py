@@ -130,7 +130,7 @@ def findClosest():
 
     for i in closest.keys():
         # TODO call prediction function and map returned values to bikes/stands
-        bikes, stands = 42, 69
+        bikes, stands = pinDic[i].get("available_bikes"), pinDic[i].get("available_bike_stands")
         predictions[i] = {"dist": closest[i], "bikes": bikes, "stands": stands}
 
     return predictions

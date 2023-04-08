@@ -281,7 +281,7 @@ function getCurrentLocation() {
     });
 }
 
-// function using POST request to send selected location to backend. Backend responds with closest station.
+// function using POST request to send selected location to backend. Backend responds with 10 closest stations.
 async function sendLoc() {
     fetch(`${window.origin}`, {
         method: "POST",
@@ -293,125 +293,253 @@ async function sendLoc() {
         })
     })
         .then((response) => response.json())
-        .then((data) => showClosest(data));
+        .then(async (data) => {
+            const routeFinder = new RouteFinder(userloc, data, pinDic);
+            await routeFinder.updateRouteInfo();
+            displayStations(routeFinder);
+        });
 }
 
-// function to find route distances
-function findRoute(origin, dest) {
-    return new Promise((resolve, reject) => {
-        let mode = document.getElementById("mode").value;
+// class storing stations that will be displayed to the user
+class Station {
+    constructor(stationNumber, stationName, bikes, stands, dist, dur, position) {
+        this.stationNumber = stationNumber;
+        this.stationName = stationName;
+        this.bikes = bikes;
+        this.stands = stands;
+        this.dist = dist;
+        this.duration = dur;
+        this.position = position;
+    }
+}
+
+// class storing functionality needed to get all necessary info relating to stations
+class RouteFinder {
+    constructor(userloc, data, pinDic) {
+        this.userloc = userloc;
+        this.stations = Object.entries(data).map(([key, value]) => {
+            let position = pinDic[key].position;
+            let stationName = pinDic[key].name;
+            return new Station(parseInt(key), stationName, value.bikes, value.stands, value.dist, 0, position);
+        });
+    }
+
+    // function to get route distances & durations
+    async getRouteInfo() {
+        return new Promise((resolve, reject) => {
+            let mode = document.getElementById("mode").value;
+            // storing the destination coordinates in an array
+            let destinations = this.stations.map(station => {
+                return new google.maps.LatLng(station.position.lat, station.position.lng);
+            });
+            // storing the coordinates of the user's location in an array (1 element only)
+            let origins = [new google.maps.LatLng(this.userloc.lat, this.userloc.lng)]
+
+            let req = {
+                origins: origins,
+                destinations: destinations,
+                travelMode: mode
+            };
+
+            // sending request to distance matrix API
+            let distanceMatrixService = new google.maps.DistanceMatrixService();
+            distanceMatrixService.getDistanceMatrix(req, function (res, status) {
+                if (status === "OK") {
+                    // getting distance and duration values in response
+                    let routeInfo = res.rows[0].elements.map(row => ({
+                        distance: row.distance.value,
+                        duration: row.duration.value
+                    }));
+                    resolve(routeInfo);
+                } else {
+                    reject("Error getting route:", status);
+                }
+            });
+        });
+    }
+
+    // function to update the info related to the route for each station
+    async updateRouteInfo() {
+        const routeInfoArray = await this.getRouteInfo();
+
+        this.stations.forEach((station, index) => {
+            station.dist = routeInfoArray[index].distance;
+            station.duration = routeInfoArray[index].duration;
+        });
+    }
+
+    // function to show the selected route on the map
+    async showRoute(destIndex) {
+        let stationNumber = this.stations[destIndex].stationNumber;
+        let dest = new google.maps.LatLng(this.stations[destIndex].position.lat, this.stations[destIndex].position.lng);
+        let mode = document.getElementById('mode').value;
         let req = {
-            origin: origin,
+            origin: this.userloc,
             destination: dest,
             travelMode: mode,
         };
 
-        directionsService.route(req, function (res, status) {
-            if (status === "OK") {
-                let dist = res.routes[0].legs[0].distance.value;
-                resolve(dist);
+        // sending the request to the directionService API
+        directionsService.route(req, (res, status) => {
+            if (status === 'OK') {
+                // hiding default markers
+                directionsRenderer.setOptions({
+                    suppressMarkers: true
+                });
+                // displaying the route on the map
+                directionsRenderer.setDirections(res);
+                // calling function to display custom origin marker
+                this.updateOriginMarker(res);
             } else {
-                reject("Error getting route:", status);
+                console.error('Error getting route:', status);
             }
         });
-    });
-}
+    }
 
-// function to show the closest station based on route distance
-async function showClosest(data) {
-    let min_dist = {number: "0", distance: -1};
-    let final_dest;
-    let dist;
+    // function to display custom origin marker
+    async updateOriginMarker(res) {
+        // remove previous origin marker, if present
+        if (originMarker) {
+            originMarker.setMap(null);
+        }
 
-    for (let i in data) {
-        let n = i.toString();
-        let dest = {
-            lat: pinDic[n]["position"]["lat"],
-            lng: pinDic[n]["position"]["lng"],
-        };
-
-        try {
-            dist = await findRoute(userloc, dest);
-
-            if (min_dist["distance"] === -1 || dist < min_dist["distance"]) {
-                min_dist["number"] = n;
-                min_dist["distance"] = dist;
-                final_dest = dest;
+        // display new marker
+        let originLatLng = res.routes[0].legs[0].start_location;
+        originMarker = new google.maps.Marker({
+            position: originLatLng,
+            map: directionsRenderer.getMap(),
+            icon: {
+                url: 'static/icons/user.svg', // Replace with your custom icon path
+                scaledSize: new google.maps.Size(40, 40) // Set the width and height
             }
-        } catch (error) {
-            console.error(error);
-        }
+        });
     }
-
-    let n = min_dist["number"];
-    document.getElementById("stationInfo").innerHTML =
-        "Closest station: " + pinDic[n]["name"];
-    let stationInfo = pinDic[n]["name"] + " <br>Station Number: " + pinDic[n]["number"] + ", <br>Available Bikes: " + pinDic[n]["available_bikes"] + ", <br>Available Bike Stands: " + pinDic[n]["available_bike_stands"];
-    document.getElementById("stationInfo").innerHTML = "Closest station: " + stationInfo;
-    showRoute(userloc, final_dest);
 }
 
-// function to actually display the route on the map
-function showRoute(origin, dest) {
-    let dist;
-    let dur;
-    let mode = document.getElementById('mode').value;
-    let req = {
-        origin: origin,
-        destination: dest,
-        travelMode: mode,
-    };
+function setDateTime() {
+    const now = new Date();
+    const dateTimeInput = document.getElementById("datetime");
+    dateTimeInput.value = now.toISOString().slice(0, 16);
+}
 
-    directionsService.route(req, function (res, status) {
-        if (status === 'OK') {
-            directionsRenderer.setOptions({
-                suppressMarkers: true
+// create table to display station-info on webpage
+function displayStations(routeFinder) {
+    const stationsContainer = document.getElementById('stations-container');
+
+    // clearing any previous content
+    stationsContainer.innerHTML = '';
+
+    // creating table
+    const table = document.createElement('table');
+    table.className = 'stations-table';
+
+    // creating headers
+    const tableHeader = document.createElement('thead');
+    tableHeader.innerHTML = `
+    <tr>
+        <th sort-index="0">Number <span class="sort-symbol"></span></th>
+        <th sort-index="1">Name <span class="sort-symbol"></span></th>
+        <th sort-index="2">Distance (metres) <span class="sort-symbol"></span></th>
+        <th sort-index="3">Duration (minutes) <span class="sort-symbol"></span></th>
+        <th sort-index="4">Bikes <span class="sort-symbol"></span></th>
+        <th sort-index="5">Stands <span class="sort-symbol"></span></th>
+        <th></th>
+    </tr>
+`;
+    // add headers to table
+    table.appendChild(tableHeader);
+
+    // make table sortable
+    tableHeader.querySelectorAll('th[sort-index]').forEach(header => {
+        header.addEventListener('click', () => {
+            const columnIndex = parseInt(header.getAttribute('sort-index'));
+            const currentOrder = header.getAttribute('sort-order') || 'asc';
+            const newOrder = currentOrder === 'asc' ? 'desc' : 'asc';
+            
+            // display correct symbol for sorted column
+            tableHeader.querySelectorAll('th[sort-index]').forEach(header => {
+                const symbolSpan = header.querySelector('.sort-symbol');
+                if (header === event.target) {
+                    symbolSpan.textContent = newOrder === 'asc' ? '▲' : '▼';
+                } else {
+                    symbolSpan.textContent = '';
+                }
             });
-            directionsRenderer.setDirections(res);
-            dist = res.routes[0].legs[0].distance.text;
-            dur = res.routes[0].legs[0].duration.text;
 
-            document.getElementById("stationDuration").innerHTML = "Distance: " + dist + "<br>" + "Duration: " + dur;
+            // call function to sort table based on selected header
+            sortTable(table, columnIndex, newOrder);
 
-            // Update the origin marker
-            updateOriginMarker(res);
+            // update sort-order attribute
+            header.setAttribute('sort-order', newOrder);
+        });
+    });
+
+    // create table body
+    const tableBody = document.createElement('tbody');
+
+    routeFinder.stations.forEach((station, index) => {
+        const row = document.createElement('tr');
+
+        row.innerHTML = `
+            <td>${station.stationNumber}</td>
+            <td>${station.stationName}</td>
+            <td>${station.dist}</td>
+            <td>${Math.ceil(station.duration / 60)}</td>
+            <td>${station.bikes}</td>
+            <td>${station.stands}</td>
+            <td><button>Show Route</button></td>
+        `;
+
+        row.querySelector('button').addEventListener('click', () => {
+            routeFinder.showRoute(index);
+        });
+
+        tableBody.appendChild(row);
+    });
+    // add body to table
+    table.appendChild(tableBody);
+    stationsContainer.appendChild(table);
+
+    // sort table by distance initially
+    sortTable(table, 2, 'asc');
+    // display correct sorting symbol
+    const distanceHeader = tableHeader.querySelector('th[sort-index="2"]');
+    const distanceSymbolSpan = distanceHeader.querySelector('.sort-symbol');
+    distanceSymbolSpan.textContent = '▲';
+}
+
+// function to sort table by column values
+function sortTable(table, columnIndex, order) {
+    const tableBody = table.querySelector('tbody');
+    const rows = Array.from(tableBody.querySelectorAll('tr'));
+
+    rows.sort((a, b) => {
+        const cellA = a.cells[columnIndex].textContent;
+        const cellB = b.cells[columnIndex].textContent;
+
+        let compare = 0;
+        // handling for numerical values
+        if (!isNaN(parseFloat(cellA)) && !isNaN(parseFloat(cellB))) {
+            compare = parseFloat(cellA) - parseFloat(cellB);
+        //     handling for text values
         } else {
-            console.error('Error getting route:', status);
+            compare = cellA.localeCompare(cellB);
         }
+
+        return order === 'desc' ? -compare : compare;
     });
+
+    tableBody.innerHTML = '';
+    rows.forEach(row => tableBody.appendChild(row));
 }
 
-// function to update the origin marker for the route
-function updateOriginMarker(res) {
-    // Remove the old origin marker
-    if (originMarker) {
-        originMarker.setMap(null);
-    }
 
-    // set custom origin marker
-    let originLatLng = res.routes[0].legs[0].start_location;
-    originMarker = new google.maps.Marker({
-        position: originLatLng,
-        map: directionsRenderer.getMap(),
-        icon: {
-            url: 'static/icons/user.svg',
-            scaledSize: new google.maps.Size(40, 40)
-        }
-    });
-}
-
-    function setDateTime() {
-        const now = new Date();
-        const dateTimeInput = document.getElementById("datetime");
-        dateTimeInput.value = now.toISOString().slice(0, 16);
-    }
-
-    const dateTime = document.getElementById("datetime");
+const dateTime = document.getElementById("datetime");
 
 // Get the value of the selected date and time
-    dateTime.addEventListener("change", function () {
-        const selectedDateTime = dateTime.value;
-        console.log(selectedDateTime);
-    });
+dateTime.addEventListener("change", function () {
+    const selectedDateTime = dateTime.value;
+    console.log(selectedDateTime);
+});
 
-    window.initMap = initMap;
+window.initMap = initMap;

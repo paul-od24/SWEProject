@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>dbikes23</title> 
+    <title>dbikes23</title>
     <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
     <link rel="stylesheet" type="text/css" href="../static/css/style.css" />
     <script type="text/javascript" src="../static/js/index.js"></script>
@@ -18,7 +18,7 @@
     </script>
   </head>
   <body>
-    
+
     <div id="main_div">
       <div id="map"></div>
       <div id="weather">
@@ -37,18 +37,17 @@
         <option value="DRIVING">Driving</option>
         <option value="BICYCLING">Cycling</option>
         <option value="TRANSIT">Public Transport</option>
-      </select><button type="button" onclick="sendLoc()">Find closest station</button>
+      </select><button type="button" onclick="sendLoc()">Find closest stations</button>
     </div>
-    <div id="stationInfo"></div>
-    <div id="stationDuration"></div>
-      
-          <table id="weather_48">
-          </table>
-        </div>
-        <div style="overflow-x:auto;">
-          <table id="weather_week">
-          </table>   
-        </div>
+    <div id="stations-container" style="height: 35vh; overflow-y: auto"></div>
+
+<!--          <table id="weather_48">-->
+<!--          </table>-->
+<!--        </div>-->
+<!--        <div style="overflow-x:auto;">-->
+<!--          <table id="weather_week">-->
+<!--          </table>-->
+<!--        </div>-->
       </div>
     </div>
     <script
@@ -64,5 +63,6 @@
 
     <div id="station"></div>
     <div id="route"></div>
+
   </body>
 </html>

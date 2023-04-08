@@ -79,6 +79,10 @@ th {
   color: white;
 }
 
+th[sort-index]:hover {
+    cursor: pointer;
+}
+
 #weather_key {
   border: 1px solid black;
   background-color: #f2f2f2;
