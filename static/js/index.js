@@ -557,6 +557,12 @@ function updateLayout() {
 
 function createChart(station) {
     const ctx = document.getElementById('myChart').getContext('2d');
+    
+    // destroy existing chart instance if it exists
+    if (window.myChart instanceof Chart) {
+        window.myChart.destroy();
+    }
+    
     const chart = new Chart(ctx, {
       type: 'bar',
       data: {
