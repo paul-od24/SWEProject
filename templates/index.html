@@ -20,7 +20,10 @@
   <body>
 
     <div id="main_div">
-      <div id="map"></div>
+      <div id="map_and_graphs">
+        <div id="map"></div>
+        <div id="graphs">chart placeholder</div>
+      </div>
       <div id="weather">
         <h2>DBIKES23 - A real-time Dublin bike availability map </h2>
     <button onclick="toggleMarkers()">Toggle Markers</button>
@@ -60,9 +63,6 @@
       popWeather48({{wetDic|safe}});
       popWeatherWeek({{wetDic|safe}});
     </script>
-
-    <div id="station"></div>
-    <div id="route"></div>
-
+    </div>
   </body>
 </html>

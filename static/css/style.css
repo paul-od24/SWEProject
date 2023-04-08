@@ -6,10 +6,23 @@ body {
   color: white;
 }
 
-#map {
-  height: 100vh;
-  width: 70%;
+#map_and_graphs {
+  height: 95vh;
+  width: 60%;
+  display: flex;
+  flex-direction: column;
+}
 
+#map {
+  height: 95vh;
+  width:100%;
+}
+
+#graphs {
+  width: 100%;
+  background-color: white;
+  color: black;
+  height: 0vh
 }
 
 #weather {

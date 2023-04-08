@@ -444,6 +444,7 @@ function displayStations(routeFinder) {
         <th sort-index="4">Bikes <span class="sort-symbol"></span></th>
         <th sort-index="5">Stands <span class="sort-symbol"></span></th>
         <th></th>
+        <th></th>
     </tr>
 `;
     // add headers to table
@@ -455,7 +456,7 @@ function displayStations(routeFinder) {
             const columnIndex = parseInt(header.getAttribute('sort-index'));
             const currentOrder = header.getAttribute('sort-order') || 'asc';
             const newOrder = currentOrder === 'asc' ? 'desc' : 'asc';
-            
+
             // display correct symbol for sorted column
             tableHeader.querySelectorAll('th[sort-index]').forEach(header => {
                 const symbolSpan = header.querySelector('.sort-symbol');
@@ -487,12 +488,18 @@ function displayStations(routeFinder) {
             <td>${Math.ceil(station.duration / 60)}</td>
             <td>${station.bikes}</td>
             <td>${station.stands}</td>
-            <td><button>Show Route</button></td>
+            <td><button class="show-route-btn">Show Route</button></td>
+            <td><button class="show-graphs-btn">Show Graphs</button></td>
         `;
 
-        row.querySelector('button').addEventListener('click', () => {
+        row.querySelector('.show-route-btn').addEventListener('click', () => {
             routeFinder.showRoute(index);
         });
+
+        row.querySelector('.show-graphs-btn').addEventListener('click', () => {
+            updateLayout();
+        });
+
 
         tableBody.appendChild(row);
     });
@@ -521,7 +528,7 @@ function sortTable(table, columnIndex, order) {
         // handling for numerical values
         if (!isNaN(parseFloat(cellA)) && !isNaN(parseFloat(cellB))) {
             compare = parseFloat(cellA) - parseFloat(cellB);
-        //     handling for text values
+            //     handling for text values
         } else {
             compare = cellA.localeCompare(cellB);
         }
@@ -541,5 +548,10 @@ dateTime.addEventListener("change", function () {
     const selectedDateTime = dateTime.value;
     console.log(selectedDateTime);
 });
+
+function updateLayout() {
+    document.getElementById("map").style.height="60vh";
+    document.getElementById("graphs").style.height="35vh";
+}
 
 window.initMap = initMap;
