@@ -87,10 +87,6 @@ for station_number in station_numbers:
         merged_df['day'] = merged_df['last_update'].dt.day
         merged_df['hour'] = merged_df['last_update'].dt.hour
         merged_df['minute'] = merged_df['last_update'].dt.minute
-        # encode workday columns as 0 or 1
-        workday = merged_df.workday
-        workday = workday.apply(lambda x : 1 if x else 0)
-        workday.value_counts()
         # create features df
         features = merged_df
         # drop columns from features that are not used by model
