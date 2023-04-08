@@ -8,4 +8,8 @@
 /wdata.xml
 /dbtest.py
 /__pycache__/
-
+/DB_Backup
+/.ipynb_checkpoints
+/merged.csv
+/DB_Model.ipynb
+/pickle_jar
