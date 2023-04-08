@@ -497,8 +497,9 @@ function displayStations(routeFinder) {
         });
 
         row.querySelector('.show-graphs-btn').addEventListener('click', () => {
+            createChart(station);
             updateLayout();
-        });
+          });
 
 
         tableBody.appendChild(row);
@@ -553,5 +554,29 @@ function updateLayout() {
     document.getElementById("map").style.height="60vh";
     document.getElementById("graphs").style.height="35vh";
 }
+
+function createChart(station) {
+    const ctx = document.getElementById('myChart').getContext('2d');
+    const chart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Bikes', 'Stands'],
+        datasets: [{
+          label: 'Availability',
+          backgroundColor: ['#36A2EB', '#FF6384'],
+          data: [station.bikes, station.stands]
+        }]
+      },
+      options: {
+        scales: {
+          yAxes: [{
+            ticks: {
+              beginAtZero: true
+            }
+          }]
+        }
+      }
+    });
+  }
 
 window.initMap = initMap;

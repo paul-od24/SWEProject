@@ -53,7 +53,6 @@ app = Flask(__name__, template_folder="./templates")
 def update_data():
     """
     Function that gets the latest bike and weather data and stores it in the appropriate dictionaries.
-
     Returns: void
     """
     # sql statement to select bike data
@@ -98,7 +97,6 @@ def update_data():
 def mapview():
     """
     Function returning rendered template index.html including variables needed for weather & pins
-
     Returns:
         object: rendered flask template
     """
@@ -111,7 +109,6 @@ def mapview():
 def findClosest():
     """
     Function taking a location from the webpage and checking for the closest station.
-
     Returns:
         dict: Dictionary containing number of and distance to closest station.
     """
@@ -138,4 +135,3 @@ def findClosest():
 
 if __name__ == "__main__":
     app.run(debug=True)
-
