@@ -123,8 +123,9 @@ for station_number in station_numbers:
             pickle.dump(gbrt_pipeline, handle, pickle.HIGHEST_PROTOCOL)
         print(f"Model created for station number {station_number}")
         num_models += 1
-    except:
+    except Exception as e:
         print(f"Error generating model for station number {station_number}")
+        print("Error details: \n" + str(e))
         num_fails += 1
 
 print(f"Finished. Generated {num_models} models and {num_fails} failures.")
