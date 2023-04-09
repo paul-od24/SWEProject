@@ -239,7 +239,6 @@ function initialize() {
     autocomplete.addListener('place_changed', function () {
         let place = autocomplete.getPlace();
         userloc = {"lat": place.geometry['location'].lat(), "lng": place.geometry['location'].lng()};
-        removeError();
     });
 }
 
@@ -269,15 +268,15 @@ function currentLoc() {
             );
         } else {
             // error in case navigation.geolocator not available
-            reject(new Error('Geolocation is not supported by your browser.'));
+            const error = new Error('Geolocation is not supported by your browser.')
+            error.custom = true
+            reject(error);
         }
     });
 }
 
 // function gets the current location of the user and populates the search bar with the formatted address of that location.
 function getCurrentLocation() {
-    // remove old error message in case there is one
-    removeError()
     // show loading icon
     showLoading()
 
@@ -311,7 +310,6 @@ function showLoading() {
     const loadingIcon = document.getElementById("loading_icon");
     loadingIcon.classList.remove("loading_hidden");
     loadingIcon.classList.add("loading");
-
 }
 
 // function that hides the loading icon
@@ -323,43 +321,31 @@ function hideLoading() {
 
 // shows error message based on type of error
 function showErrorMessage(error) {
-    // default message
-    let message = 'Error: Unable to retrieve current location.';
-
-    // specific messages based on error encountered
-    if (error.code === error.PERMISSION_DENIED) {
-        message = 'Error: Location access has been denied.';
+    let message;
+    // messages based on error encountered
+    if (error.custom) {
+        message = error.message
+    } else if (error.code === error.PERMISSION_DENIED) {
+        message = "Error: Location access has been denied.";
     } else if (error.code === error.POSITION_UNAVAILABLE) {
-        message = 'Error: Location information is unavailable.';
+        message = "Error: Location information is unavailable.";
     } else if (error.code === error.TIMEOUT) {
-        message = 'Error: The request to get the current location timed out.';
-    } else if (error.message === 'Geolocation is not supported by this browser.') {
-        message = error.message;
+        message = "Error: The request to get the current location timed out.";
     }
-
-    // set error message
-    const errorMessage = document.createElement('span');
-    errorMessage.id = 'error_message';
-    errorMessage.textContent = message;
-    errorMessage.style.color = 'red';
-
-    // adjust display of loading icon / error message
-    const loadingIcon = document.getElementById("loading_icon");
-    loadingIcon.parentNode.insertBefore(errorMessage, loadingIcon);
+    // display an alert with the error message
+    alert(message);
     // hide loading icon if error message is displayed
     hideLoading()
 }
 
-// removes old error message if there is one
-function removeError() {
-    const ErrorMessage = document.getElementById("error_message");
-    if (ErrorMessage) {
-        ErrorMessage.remove();
-    }
-}
-
 // function using POST request to send selected location to backend. Backend responds with 10 closest stations.
 async function sendLoc() {
+    if (!userloc || !userloc.hasOwnProperty("lat") || !userloc.hasOwnProperty("lng")) {
+        const error = new Error("Please choose a location from the dropdown menu that appears once you start entering a location or use your current location.")
+        error.custom = true
+        showErrorMessage(error)
+        return
+    }
     fetch(`${window.origin}`, {
         method: "POST",
         credentials: "include",
@@ -499,6 +485,14 @@ function setDateTime() {
     dateTimeInput.value = now.toISOString().slice(0, 16);
 }
 
+const dateTime = document.getElementById("datetime");
+
+// Get the value of the selected date and time
+dateTime.addEventListener("change", function () {
+    const selectedDateTime = dateTime.value;
+    console.log(selectedDateTime);
+});
+
 // create table to display station-info on webpage
 function displayStations(routeFinder) {
     const stationsContainer = document.getElementById('stations-container');
@@ -617,15 +611,6 @@ function sortTable(table, columnIndex, order) {
     tableBody.innerHTML = '';
     rows.forEach(row => tableBody.appendChild(row));
 }
-
-
-const dateTime = document.getElementById("datetime");
-
-// Get the value of the selected date and time
-dateTime.addEventListener("change", function () {
-    const selectedDateTime = dateTime.value;
-    console.log(selectedDateTime);
-});
 
 function updateLayout() {
     document.getElementById("map").style.height = "60vh";
