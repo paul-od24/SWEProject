@@ -454,7 +454,35 @@ class RouteFinder {
                 // calling function to display custom origin marker
                 this.updateOriginMarker(res);
             } else {
+                // an error occurred
                 console.error('Error getting route:', status);
+                const error = new Error()
+                error.custom = true;
+                // define error message based on status
+                switch (status) {
+                    case 'NOT_FOUND':
+                        error.message = 'Error: Origin/Destination could not be found.';
+                        break;
+                    case 'ZERO_RESULTS':
+                        error.message = 'Error: No route could be found.';
+                        break;
+                    case 'INVALID_REQUEST':
+                        error.message = 'Error: Invalid routing request.';
+                        break;
+                    case 'OVER_QUERY_LIMIT':
+                        error.message = 'Error: Too many routing requests. Please try again later.';
+                        break;
+                    case 'REQUEST_DENIED':
+                        error.message = 'Error: Routing request was denied. Please try again later.';
+                        break;
+                    case 'UNKNOWN_ERROR':
+                        error.message = 'Error: An unknown error occurred. Please try again later.';
+                        break;
+                    default:
+                        error.message = 'Error: Unable to retrieve route. Please try again later.';
+                }
+                // display error message
+                showErrorMessage(error)
             }
         });
     }
