@@ -677,6 +677,7 @@ function createChart(station) {
             }
         }
     });
+    window.myChart = chart;
 }
 
 
