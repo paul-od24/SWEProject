@@ -239,12 +239,16 @@ function initialize() {
     autocomplete.addListener('place_changed', function () {
         let place = autocomplete.getPlace();
         userloc = {"lat": place.geometry['location'].lat(), "lng": place.geometry['location'].lng()};
+        removeError();
     });
 }
 
+// function that gets the current location from the api
 function currentLoc() {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
+        // checks if geolocation can be accessed
         if (navigator.geolocation) {
+            // get the user's position and store the coordinates in userloc
             navigator.geolocation.getCurrentPosition(
                 (position) => {
                     userloc = {
@@ -256,29 +260,102 @@ function currentLoc() {
                     const input = document.getElementById("autocomplete_search");
                     // set the value of the input field to the current latitude and longitude
                     input.value = `${userloc.lat},${userloc.lng}`;
-                })
+                },
+                // error handling
+                (error) => {
+                    // reject if error, e.g. user denies location access
+                    reject(error);
+                }
+            );
+        } else {
+            // error in case navigation.geolocator not available
+            reject(new Error('Geolocation is not supported by your browser.'));
         }
     });
 }
 
 // function gets the current location of the user and populates the search bar with the formatted address of that location.
 function getCurrentLocation() {
+    // remove old error message in case there is one
+    removeError()
+    // show loading icon
+    showLoading()
+
     currentLoc().then((location) => {
         var geocoder = new google.maps.Geocoder();
         geocoder.geocode({
             location: new google.maps.LatLng(location.lat, location.lng)
         }, function (results, status) {
+
             if (status == "OK") {
                 autocomplete.setFields(["address_component", "geometry"]);
                 autocomplete.setBounds(results[0].geometry.viewport);
                 document.getElementById("autocomplete_search").value =
                     results[0].formatted_address;
+                // hide loading icon on success
+                hideLoading()
             } else {
                 // if the geocoder fails, log an error message to the console
                 console.log("Geocode was not successful for the following reason: " + status);
             }
         });
-    });
+    })
+        .catch((error) => {
+            // call function to show error message
+            showErrorMessage(error);
+        });
+}
+
+// function that shows the loading icon displayed while getting the current location
+function showLoading() {
+    const loadingIcon = document.getElementById("loading_icon");
+    loadingIcon.classList.remove("loading_hidden");
+    loadingIcon.classList.add("loading");
+
+}
+
+// function that hides the loading icon
+function hideLoading() {
+    const loadingIcon = document.getElementById("loading_icon");
+    loadingIcon.classList.remove("loading");
+    loadingIcon.classList.add("loading_hidden");
+}
+
+// shows error message based on type of error
+function showErrorMessage(error) {
+    // default message
+    let message = 'Error: Unable to retrieve current location.';
+
+    // specific messages based on error encountered
+    if (error.code === error.PERMISSION_DENIED) {
+        message = 'Error: Location access has been denied.';
+    } else if (error.code === error.POSITION_UNAVAILABLE) {
+        message = 'Error: Location information is unavailable.';
+    } else if (error.code === error.TIMEOUT) {
+        message = 'Error: The request to get the current location timed out.';
+    } else if (error.message === 'Geolocation is not supported by this browser.') {
+        message = error.message;
+    }
+
+    // set error message
+    const errorMessage = document.createElement('span');
+    errorMessage.id = 'error_message';
+    errorMessage.textContent = message;
+    errorMessage.style.color = 'red';
+
+    // adjust display of loading icon / error message
+    const loadingIcon = document.getElementById("loading_icon");
+    loadingIcon.parentNode.insertBefore(errorMessage, loadingIcon);
+    // hide loading icon if error message is displayed
+    hideLoading()
+}
+
+// removes old error message if there is one
+function removeError() {
+    const ErrorMessage = document.getElementById("error_message");
+    if (ErrorMessage) {
+        ErrorMessage.remove();
+    }
 }
 
 // function using POST request to send selected location to backend. Backend responds with 10 closest stations.
@@ -499,7 +576,7 @@ function displayStations(routeFinder) {
         row.querySelector('.show-graphs-btn').addEventListener('click', () => {
             createChart(station);
             updateLayout();
-          });
+        });
 
 
         tableBody.appendChild(row);
@@ -551,38 +628,39 @@ dateTime.addEventListener("change", function () {
 });
 
 function updateLayout() {
-    document.getElementById("map").style.height="60vh";
-    document.getElementById("graphs").style.height="35vh";
+    document.getElementById("map").style.height = "60vh";
+    document.getElementById("graphs").style.height = "35vh";
 }
 
 function createChart(station) {
     const ctx = document.getElementById('myChart').getContext('2d');
-    
+
     // destroy existing chart instance if it exists
     if (window.myChart instanceof Chart) {
         window.myChart.destroy();
     }
-    
+
     const chart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: ['Bikes', 'Stands'],
-        datasets: [{
-          label: 'Availability',
-          backgroundColor: ['#36A2EB', '#FF6384'],
-          data: [station.bikes, station.stands]
-        }]
-      },
-      options: {
-        scales: {
-          yAxes: [{
-            ticks: {
-              beginAtZero: true
+        type: 'bar',
+        data: {
+            labels: ['Bikes', 'Stands'],
+            datasets: [{
+                label: 'Availability',
+                backgroundColor: ['#36A2EB', '#FF6384'],
+                data: [station.bikes, station.stands]
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
             }
-          }]
         }
-      }
     });
-  }
+}
+
 
 window.initMap = initMap;

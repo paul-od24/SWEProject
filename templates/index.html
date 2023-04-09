@@ -8,67 +8,68 @@
     <script type="text/javascript" src="../static/js/index.js"></script>
     <script>
       setPinDic({{ dic|safe }})
-  function toggleMarkers() {
-    markersVisible = !markersVisible;
-     for (let i in pinDic) {
-      const stationMarker = stations[pinDic[i]["number"]];
-      stationMarker.setVisible(markersVisible);
-    }
-  }
+
+      function toggleMarkers() {
+          markersVisible = !markersVisible;
+          for (let i in pinDic) {
+              const stationMarker = stations[pinDic[i]["number"]];
+              stationMarker.setVisible(markersVisible);
+          }
+      }
     </script>
   </head>
+
   <body>
+      <div id="main_div">
+          <div id="map_and_graphs">
+              <div id="map"></div>
+              <div id="graphs">chart placeholder
+                  <canvas id="myChart"></canvas>
+              </div>
+          </div>
+          <div id="weather">
+              <h2>DBIKES23 - A real-time Dublin bike availability map </h2>
+              <button onclick="toggleMarkers()">Toggle Markers</button>
+              <div id="weather_cur"></div>
+              <div style="overflow-x:auto;">
+                  <label for="datetime">Select a date and time:</label>
+                  <input type="datetime-local" id="datetime" name="datetime">
+                  <div>
+                      <input id="autocomplete_search" type="text" size="50" style="margin-bottom: 20px; margin-right: 20px">
+                      <button type="button" onclick="getCurrentLocation()">Use Current Location</button>
+                      <span id="loading_icon" class="loading_hidden"></span>
+                  </div>
+                  <div id="travel"><label for="mode"> Travel Mode:</label>
+                      <select id="mode">
+                          <option value="WALKING">Walking</option>
+                          <option value="DRIVING">Driving</option>
+                          <option value="BICYCLING">Cycling</option>
+                          <option value="TRANSIT">Public Transport</option>
+                      </select>
+                      <button type="button" onclick="sendLoc()">Find closest stations</button>
+                  </div>
+                  <div id="stations-container" style="height: 35vh; overflow-y: auto"></div>
 
-    <div id="main_div">
-      <div id="map_and_graphs">
-        <div id="map"></div>
-        <div id="graphs">chart placeholder
-          <canvas id="myChart"></canvas>
-        </div>
+                  <!--          <table id="weather_48">-->
+                  <!--          </table>-->
+                  <!--        </div>-->
+                  <!--        <div style="overflow-x:auto;">-->
+                  <!--          <table id="weather_week">-->
+                  <!--          </table>-->
+                  <!--        </div>-->
+                  <div id="graphs" style="display:none;">
+                      <canvas id="bike-chart"></canvas>
+                  </div>
+              </div>
+          </div>
+          <script src="https://maps.googleapis.com/maps/api/js?key={{mapkey}}&libraries=places&callback=initMap&v=weekly" defer></script>
+          <script>
+              popWeatherCurrent({{wCur|safe}});
+              popWeather48({{wetDic|safe}});
+              popWeatherWeek({{wetDic|safe}});
+          </script>
+          <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
       </div>
-      <div id="weather">
-        <h2>DBIKES23 - A real-time Dublin bike availability map </h2>
-    <button onclick="toggleMarkers()">Toggle Markers</button>
-        <div id="weather_cur"></div>
-        <div style="overflow-x:auto;">
-          <label for="datetime">Select a date and time:</label>
-          <input type="datetime-local" id="datetime" name="datetime">
-          <div>
-            <input id="autocomplete_search" type="text" size="50" style="margin-bottom: 20px; margin-right: 20px">
-          <button type="button" onclick="getCurrentLocation()">Use Current Location</button></div>
-      <div id="travel"><label for="mode">   Travel Mode:</label>
-      <select id="mode">
-        <option value="WALKING">Walking</option>
-        <option value="DRIVING">Driving</option>
-        <option value="BICYCLING">Cycling</option>
-        <option value="TRANSIT">Public Transport</option>
-      </select><button type="button" onclick="sendLoc()">Find closest stations</button>
-    </div>
-    <div id="stations-container" style="height: 35vh; overflow-y: auto"></div>
-
-<!--          <table id="weather_48">-->
-<!--          </table>-->
-<!--        </div>-->
-<!--        <div style="overflow-x:auto;">-->
-<!--          <table id="weather_week">-->
-<!--          </table>-->
-<!--        </div>-->
-<div id="graphs" style="display:none;">
-  <canvas id="bike-chart"></canvas>
-</div></div>
-    </div>
-    <script
-      src="https://maps.googleapis.com/maps/api/js?key={{mapkey}}&libraries=places&callback=initMap&v=weekly"
-      defer
-    >
-    </script>
-    <script>
-      popWeatherCurrent({{wCur|safe}});
-      popWeather48({{wetDic|safe}});
-      popWeatherWeek({{wetDic|safe}});
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    </div>
   </body>
 </html>
 
