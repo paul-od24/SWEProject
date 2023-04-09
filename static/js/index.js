@@ -283,10 +283,14 @@ function getCurrentLocation() {
 
 // function using POST request to send selected location to backend. Backend responds with 10 closest stations.
 async function sendLoc() {
+    let data = {
+        "pinDic": pinDic,
+        "userloc": userloc
+    }
     fetch(`${window.origin}`, {
         method: "POST",
         credentials: "include",
-        body: JSON.stringify(userloc),
+        body: JSON.stringify(data),
         cache: "no-cache",
         headers: new Headers({
             "content-type": "application/json"

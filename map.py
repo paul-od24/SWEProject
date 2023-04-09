@@ -43,14 +43,10 @@ weather_forecast = sqla.Table("weather_forecast", metadataWF,
                               schema='dbikes'
                               )
 
-pinDic = {}
-wCur = {}
-wetDic = {}
-
 app = Flask(__name__, template_folder="./templates")
 
 
-def update_data():
+def update_data(pinDic, wCur, wetDic):
     """
     Function that gets the latest bike and weather data and stores it in the appropriate dictionaries.
     Returns: void
@@ -60,10 +56,6 @@ def update_data():
     FROM station, latest_availability
     WHERE station.`number` = latest_availability.number;
     '''
-
-    global pinDic
-    global wCur
-    global wetDic
 
     with engine.begin() as connection:
         for row in connection.execute(text(stmt)):
@@ -80,8 +72,9 @@ def update_data():
         res = connection.execute(text(stmt))
         res = res.mappings().all()
         res = res[0]
-        data = {"symbol": res.symbol, "rain": res.rain, "temp": res.temp}
-        wCur = data
+        wCur["symbol"] = res.symbol
+        wCur["rain"] = res.rain
+        wCur["temp"] = res.temp
 
     # preparing sql statement to get current weather
     stmt = select(weather_forecast.c.end, weather_forecast.c.symbol, weather_forecast.c.rain_hourly)
@@ -100,7 +93,11 @@ def mapview():
     Returns:
         object: rendered flask template
     """
-    update_data()
+    pinDic = {}
+    wCur = {}
+    wetDic = {}
+
+    update_data(pinDic, wCur, wetDic)
     return render_template('index.html', dic=json.dumps(pinDic), mapkey=apilogin.MAPKEY, wCur=json.dumps(wCur),
                            wetDic=json.dumps(wetDic))
 
@@ -112,8 +109,9 @@ def findClosest():
     Returns:
         dict: Dictionary containing number of and distance to closest station.
     """
-    userloc = dict(request.get_json())
-    userloc = (userloc["lat"], userloc["lng"])
+    data = dict(request.get_json())
+    userloc = (data["userloc"]["lat"], data["userloc"]["lng"])
+    pinDic = data["pinDic"]
     d_dic = {}
     predictions = {}
     for i in pinDic:
