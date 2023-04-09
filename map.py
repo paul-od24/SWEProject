@@ -1,5 +1,4 @@
 import json
-
 from flask import Flask, render_template, request
 import sqlalchemy as sqla
 from sqlalchemy import create_engine, select, text
@@ -7,6 +6,7 @@ from geopy import distance
 from itertools import islice
 import dblogin
 import apilogin
+from availability_predict import availability_predict
 
 # creating the engine
 engine = create_engine(
@@ -125,7 +125,9 @@ def findClosest():
 
     for i in closest.keys():
         # TODO call prediction function and map returned values to bikes/stands
-        bikes, stands = pinDic[i].get("available_bikes"), pinDic[i].get("available_bike_stands")
+        res = availability_predict(i, '2023-04-14 19:15:00', engine)
+        #bikes, stands = pinDic[i].get("available_bikes"), pinDic[i].get("available_bike_stands")
+        bikes, stands = res[0], res[1]
         predictions[i] = {"dist": closest[i], "bikes": bikes, "stands": stands}
 
     return predictions
