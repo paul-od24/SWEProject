@@ -22,12 +22,17 @@
 
   <body>
       <div id="main_div">
-          <div id="map_and_graphs">
+          <div id="map_and_graphs" style="display: flex">
               <div id="map"></div>
-              <div id="graphs">chart placeholder
-                  <canvas id="myChart"></canvas>
-              </div>
+              <div id="graphs">
+                  <canvas id="weeklyChart"></canvas>
+                  <div id="hourlyChartContainer">
+                      <canvas id="hourlyChart"></canvas>
+                      <div id="dayButtons"></div>
+                </div>
+            </div>
           </div>
+
           <div id="weather">
               <h2>DBIKES23 - A real-time Dublin bike availability map </h2>
               <button onclick="toggleMarkers()">Toggle Markers</button>
@@ -58,9 +63,9 @@
                   <!--          <table id="weather_week">-->
                   <!--          </table>-->
                   <!--        </div>-->
-                  <div id="graphs" style="display:none;">
-                      <canvas id="bike-chart"></canvas>
-                  </div>
+<!--                  <div id="graphs" style="display:none;">-->
+<!--                      <canvas id="bike-chart"></canvas>-->
+<!--                  </div>-->
               </div>
           </div>
           <script src="https://maps.googleapis.com/maps/api/js?key={{mapkey}}&libraries=places&callback=initMap&v=weekly" defer></script>
