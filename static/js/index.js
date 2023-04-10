@@ -86,7 +86,48 @@ function initMap() {
     }
     // call the autocomplete function
     autocomplete_init();
+
+    // Add event listeners to buttons
+    const button1 = document.querySelector("#button1");
+    button1.addEventListener("click", function() {
+        changeIcons("red");
+    });
+    
+    const button2 = document.querySelector("#button2");
+    button2.addEventListener("click", function() {
+        changeIcons("default");
+    });
+    
+    const button3 = document.querySelector("#button3");
+    button3.addEventListener("click", function() {
+        changeIcons("bikes");
+    });
 }
+
+function changeIcons() {
+    for (let i in pinDic) {
+        const availableBikeStands = pinDic[i]["available_bike_stands"];
+        let icon;
+        if (availableBikeStands == 0) {
+            icon = {
+                url: "/static/icons/red_icon.png",
+                scaledSize: new google.maps.Size(16, 16)
+            };
+        } else if (availableBikeStands <= 5) {
+            icon = {
+                url: "/static/icons/orange_icon.png",
+                scaledSize: new google.maps.Size(16, 16)
+            };
+        } else if (availableBikeStands > 5) {
+            icon = {
+                url: "/static/icons/green_icon.png",
+                scaledSize: new google.maps.Size(16, 16)
+            };
+        }
+        stations[pinDic[i]["number"]].setIcon(icon);
+    }
+}
+
 
 // populate current weather table
 function popWeatherCurrent(weather) {
