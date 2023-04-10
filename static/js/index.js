@@ -108,6 +108,9 @@ function popWeatherCurrent(weather) {
         case "LightRain":
             weatherIcon.src = "static/icons/lightrain.png";
             break;
+        case "LightRainSun":
+            weatherIcon.src = "static/icons/lightrainsun.png";
+            break;
         // Add more cases for each weather symbol and corresponding icon
         default:
             weatherIcon.src = "static/icons/default.png"; // A default icon to use if the symbol is not recognized
