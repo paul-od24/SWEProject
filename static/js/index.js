@@ -128,6 +128,30 @@ function changeIcons() {
     }
 }
 
+function changeIconsii() {
+    for (let i in pinDic) {
+        const availableBikes = pinDic[i]["available_bikes"];
+        let icon;
+        if (availableBikes == 0) {
+            icon = {
+                url: "/static/icons/red_icon.png",
+                scaledSize: new google.maps.Size(16, 16)
+            };
+        } else if (availableBikes <= 5) {
+            icon = {
+                url: "/static/icons/orange_icon.png",
+                scaledSize: new google.maps.Size(16, 16)
+            };
+        } else if (availableBikes > 5) {
+            icon = {
+                url: "/static/icons/green_icon.png",
+                scaledSize: new google.maps.Size(16, 16)
+            };
+        }
+        stations[pinDic[i]["number"]].setIcon(icon);
+    }
+}
+
 
 // populate current weather table
 function popWeatherCurrent(weather) {
