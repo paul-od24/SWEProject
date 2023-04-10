@@ -163,6 +163,8 @@ th[sort-index]:hover {
 
 #stations-container {
   position: flex;
+  margin-top: 15px;
+  height: 100px;
 
 }
 
