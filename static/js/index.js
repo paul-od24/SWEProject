@@ -36,17 +36,36 @@ function initMap() {
 
 
     // variable that stores the location of the bike stations icon
-    var image = {
-        url: "/static/icons/bike_icon.png",
-        scaledSize: new google.maps.Size(20, 20)
-    };
+    //var image = {
+      //  url: "/static/icons/bike_icon.png",
+       // scaledSize: new google.maps.Size(20, 20)
+    //};
+
 
     // looping through the pins and adding them to the map
     for (let i in pinDic) {
+        const availableBikes = pinDic[i]["available_bikes"];
+        let icon;
+        if (availableBikes == 0) {
+            icon = {
+                url: "/static/icons/red_icon.png",
+                scaledSize: new google.maps.Size(16, 16)
+            };
+        } else if (availableBikes <= 5) {
+            icon = {
+                url: "/static/icons/orange_icon.png",
+                scaledSize: new google.maps.Size(16, 16)
+            };
+        } else if (availableBikes > 5) {
+            icon = {
+                url: "/static/icons/green_icon.png",
+                scaledSize: new google.maps.Size(16, 16)
+            };
+        }
         const stationMarker = new google.maps.Marker({
             position: pinDic[i]["position"],
             map: map,
-            icon: image
+            icon: icon
         });
 
         // Add an event listener to show the InfoWindow when you hover over the marker
