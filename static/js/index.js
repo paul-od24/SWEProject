@@ -600,7 +600,8 @@ function displayStations(routeFinder) {
         });
 
         row.querySelector('.show-graphs-btn').addEventListener('click', () => {
-            createChart(station);
+            // createChart(station);
+            graphs(station.stationNumber)
             updateLayout();
         });
 
@@ -649,36 +650,121 @@ function updateLayout() {
     document.getElementById("graphs").style.height = "35vh";
 }
 
-function createChart(station) {
-    const ctx = document.getElementById('myChart').getContext('2d');
+// function createChart(station) {
+//     const ctx = document.getElementById('myChart').getContext('2d');
+//
+//     // destroy existing chart instance if it exists
+//     if (window.myChart instanceof Chart) {
+//         window.myChart.destroy();
+//     }
+//
+//     const chart = new Chart(ctx, {
+//         type: 'bar',
+//         data: {
+//             labels: ['Bikes', 'Stands'],
+//             datasets: [{
+//                 label: 'Availability',
+//                 backgroundColor: ['#36A2EB', '#FF6384'],
+//                 data: [station.bikes, station.stands]
+//             }]
+//         },
+//         options: {
+//             scales: {
+//                 yAxes: [{
+//                     ticks: {
+//                         beginAtZero: true
+//                     }
+//                 }]
+//             }
+//         }
+//     });
+//     window.myChart = chart;
+// }
+
+
+async function graphs(station) {
+    fetch(`/graph`, {
+        method: "POST",
+        credentials: "include",
+        body: station,
+        cache: "no-cache",
+        headers: new Headers({
+            "content-type": "application/json"
+        })
+    })
+        .then((response) => response.json())
+        .then(async (data) => {
+            console.log(data)
+            const chartData = handleChartData(data);
+            weeklyChart(chartData);
+        });
+}
+
+function handleChartData(response_data) {
+    const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+    return days.map(day => response_data.filter(data => data.day === day));
+}
+
+function weeklyChart(chartData) {
 
     // destroy existing chart instance if it exists
     if (window.myChart instanceof Chart) {
         window.myChart.destroy();
     }
 
+    const ctx = document.getElementById('myChart').getContext('2d');
+    const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    const xLabels = days.flatMap(day => Array(24).fill(day));
+
+    const bikesData = chartData.map(dayData => dayData.map(hourData => hourData.available_bikes)).flat();
+    const standsData = chartData.map(dayData => dayData.map(hourData => hourData.available_bike_stands)).flat();
+
     const chart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: ['Bikes', 'Stands'],
-            datasets: [{
-                label: 'Availability',
-                backgroundColor: ['#36A2EB', '#FF6384'],
-                data: [station.bikes, station.stands]
-            }]
+            labels: xLabels,
+            datasets: [
+                {
+                    label: 'Bikes',
+                    data: bikesData,
+                    backgroundColor: '#36A2EB'
+                },
+                {
+                    label: 'Stands',
+                    data: standsData,
+                    backgroundColor: '#FF6384'
+                }
+            ]
         },
         options: {
             scales: {
-                yAxes: [{
+                x: {
+                    stacked: true,
                     ticks: {
-                        beginAtZero: true
+                        autoSkip: true,
+                        maxTicksLimit: 7,
+                        align: "start"
+                    },
+                    grid: {
+                        display: false,
+                    },
+                    border: {
+                        display: true
                     }
-                }]
+                },
+                y: {
+                    stacked: true,
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top'
+                }
             }
         }
     });
     window.myChart = chart;
 }
-
 
 window.initMap = initMap;
