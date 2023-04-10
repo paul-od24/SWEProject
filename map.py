@@ -6,7 +6,7 @@ from geopy import distance
 from itertools import islice
 import dblogin
 import apilogin
-from availability_predict import availability_predict
+from availability_predict import availability_predict, multi_availability_predict
 
 # creating the engine
 engine = create_engine(
@@ -123,11 +123,18 @@ def findClosest():
 
     closest = dict(islice(d_dic_sorted.items(), 10))
 
+    # create list of stations
+    stations = []
+    for i in closest.keys():
+        stations.append(str(i))
+
+    # pass list of stations and time to model
+    res = multi_availability_predict(stations, '2023-04-14 19:15:00', engine)
+
     for i in closest.keys():
         # TODO call prediction function and map returned values to bikes/stands
-        res = availability_predict(i, '2023-04-14 19:15:00', engine)
         #bikes, stands = pinDic[i].get("available_bikes"), pinDic[i].get("available_bike_stands")
-        bikes, stands = res[0], res[1]
+        bikes, stands = res[i][0], res[i][1]
         predictions[i] = {"dist": closest[i], "bikes": bikes, "stands": stands}
 
     return predictions
