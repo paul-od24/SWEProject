@@ -38,17 +38,36 @@ function initMap() {
 
 
     // variable that stores the location of the bike stations icon
-    var image = {
-        url: "/static/icons/bike_icon.png",
-        scaledSize: new google.maps.Size(20, 20)
-    };
+    //var image = {
+      //  url: "/static/icons/bike_icon.png",
+       // scaledSize: new google.maps.Size(20, 20)
+    //};
+
 
     // looping through the pins and adding them to the map
     for (let i in pinDic) {
+        const availableBikes = pinDic[i]["available_bikes"];
+        let icon;
+        if (availableBikes == 0) {
+            icon = {
+                url: "/static/icons/red_icon.png",
+                scaledSize: new google.maps.Size(16, 16)
+            };
+        } else if (availableBikes <= 5) {
+            icon = {
+                url: "/static/icons/orange_icon.png",
+                scaledSize: new google.maps.Size(16, 16)
+            };
+        } else if (availableBikes > 5) {
+            icon = {
+                url: "/static/icons/green_icon.png",
+                scaledSize: new google.maps.Size(16, 16)
+            };
+        }
         const stationMarker = new google.maps.Marker({
             position: pinDic[i]["position"],
             map: map,
-            icon: image
+            icon: icon
         });
 
         // Add an event listener to show the InfoWindow when you hover over the marker
@@ -69,7 +88,72 @@ function initMap() {
     }
     // call the autocomplete function
     autocomplete_init();
+
+    // Add event listeners to buttons
+    const button1 = document.querySelector("#button1");
+    button1.addEventListener("click", function() {
+        changeIcons("red");
+    });
+    
+    const button2 = document.querySelector("#button2");
+    button2.addEventListener("click", function() {
+        changeIcons("default");
+    });
+    
+    const button3 = document.querySelector("#button3");
+    button3.addEventListener("click", function() {
+        changeIcons("bikes");
+    });
 }
+
+function changeIcons() {
+    for (let i in pinDic) {
+        const availableBikeStands = pinDic[i]["available_bike_stands"];
+        let icon;
+        if (availableBikeStands == 0) {
+            icon = {
+                url: "/static/icons/red_icon.png",
+                scaledSize: new google.maps.Size(16, 16)
+            };
+        } else if (availableBikeStands <= 5) {
+            icon = {
+                url: "/static/icons/orange_icon.png",
+                scaledSize: new google.maps.Size(16, 16)
+            };
+        } else if (availableBikeStands > 5) {
+            icon = {
+                url: "/static/icons/green_icon.png",
+                scaledSize: new google.maps.Size(16, 16)
+            };
+        }
+        stations[pinDic[i]["number"]].setIcon(icon);
+    }
+}
+
+function changeIconsii() {
+    for (let i in pinDic) {
+        const availableBikes = pinDic[i]["available_bikes"];
+        let icon;
+        if (availableBikes == 0) {
+            icon = {
+                url: "/static/icons/red_icon.png",
+                scaledSize: new google.maps.Size(16, 16)
+            };
+        } else if (availableBikes <= 5) {
+            icon = {
+                url: "/static/icons/orange_icon.png",
+                scaledSize: new google.maps.Size(16, 16)
+            };
+        } else if (availableBikes > 5) {
+            icon = {
+                url: "/static/icons/green_icon.png",
+                scaledSize: new google.maps.Size(16, 16)
+            };
+        }
+        stations[pinDic[i]["number"]].setIcon(icon);
+    }
+}
+
 
 // populate current weather table
 function popWeatherCurrent(weather) {
@@ -109,6 +193,9 @@ function popWeatherCurrent(weather) {
             break;
         case "LightRain":
             weatherIcon.src = "static/icons/lightrain.png";
+            break;
+        case "LightRainSun":
+            weatherIcon.src = "static/icons/lightrainsun.png";
             break;
         // Add more cases for each weather symbol and corresponding icon
         default:
