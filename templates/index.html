@@ -29,7 +29,7 @@
           </div>
           <div id="weather">
               <h2>DBIKES23 - A real-time Dublin bike availability map </h2>
-              <button onclick="toggleMarkers()">Toggle Markers</button>
+              <button id ="secondary" onclick="toggleMarkers()">Toggle Markers</button>
               <button onclick="changeIcons()">I'm looking for a bike stand.</button>
               <button onclick="changeIconsii()">I'm looking for a bike.</button>
               <div id="weather_cur"></div>
@@ -48,7 +48,7 @@
                           <option value="BICYCLING">Cycling</option>
                           <option value="TRANSIT">Public Transport</option>
                       </select>
-                      <button type="button" onclick="sendLoc()">Find closest stations</button>
+                      <button id ="secondary" type="button" onclick="sendLoc()">Find closest stations</button>
                   </div>
                   <div id="stations-container" style="height: 35vh; overflow-y: auto"></div>
 
