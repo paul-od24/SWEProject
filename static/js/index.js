@@ -629,12 +629,11 @@ function displayStations(routeFinder) {
     const tableHeader = document.createElement('thead');
     tableHeader.innerHTML = `
     <tr>
-        <th sort-index="0">Number <span class="sort-symbol"></span></th>
-        <th sort-index="1">Name <span class="sort-symbol"></span></th>
-        <th sort-index="2">Distance (metres) <span class="sort-symbol"></span></th>
-        <th sort-index="3">Duration (minutes) <span class="sort-symbol"></span></th>
-        <th sort-index="4">Bikes <span class="sort-symbol"></span></th>
-        <th sort-index="5">Stands <span class="sort-symbol"></span></th>
+        <th sort-index="0">Name <span class="sort-symbol"></span></th>
+        <th sort-index="1">Distance<br>(metres) <span class="sort-symbol"></span></th>
+        <th sort-index="2">Duration<br>(minutes) <span class="sort-symbol"></span></th>
+        <th sort-index="3">Bikes <span class="sort-symbol"></span></th>
+        <th sort-index="4">Stands <span class="sort-symbol"></span></th>
         <th></th>
         <th></th>
     </tr>
@@ -674,7 +673,6 @@ function displayStations(routeFinder) {
         const row = document.createElement('tr');
 
         row.innerHTML = `
-            <td>${station.stationNumber}</td>
             <td>${station.stationName}</td>
             <td>${station.dist}</td>
             <td>${Math.ceil(station.duration / 60)}</td>
