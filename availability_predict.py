@@ -65,7 +65,8 @@ def availability_predict(station, time, engine):
 
         return[avail_bikes, avail_bike_stands]
     
-    except:
+    except Exception as e:
+        print("Error details: \n" + str(e))
         return [0, 0]
     
 
@@ -134,7 +135,8 @@ def multi_availability_predict(stations, time, engine):
 
             res[str(station)] = [avail_bikes, avail_bike_stands]
             
-        except:
+        except Exception as e:
+            print("Error details: \n" + str(e))
             res[str(station)] = [0, 0]
 
     return res
