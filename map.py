@@ -4,6 +4,7 @@ import sqlalchemy as sqla
 from sqlalchemy import create_engine, select, text
 from geopy import distance
 from itertools import islice
+import datetime
 import dblogin
 import apilogin
 from availability_predict import availability_predict, multi_availability_predict
@@ -113,6 +114,8 @@ def findClosest():
     data = dict(request.get_json())
     userloc = (data["userloc"]["lat"], data["userloc"]["lng"])
     pinDic = data["pinDic"]
+    input_datetime = datetime.datetime.strptime(data["time"], '%Y-%m-%dT%H:%M')
+    time = input_datetime.strftime('%Y-%m-%d %H:%M:%S')
     d_dic = {}
     predictions = {}
     for i in pinDic:
@@ -130,7 +133,7 @@ def findClosest():
         stations.append(str(i))
 
     # pass list of stations and time to model
-    res = multi_availability_predict(stations, '2023-04-14 19:15:00', engine)
+    res = multi_availability_predict(stations, time, engine)
 
     for i in closest.keys():
         # TODO call prediction function and map returned values to bikes/stands

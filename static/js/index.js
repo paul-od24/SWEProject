@@ -615,7 +615,7 @@ function setDateTime() {
   
     // Get the value of the selected date and time
     dateTime.addEventListener("change", function () {
-      const selectedDateTime = dateTime.value;
+      selectedDateTime = dateTime.value;
       if (selectedDateTime) {
         console.log(selectedDateTime);
       } else {
