@@ -21,9 +21,35 @@ body {
 
 #graphs {
   width: 100%;
+  display: flex;
+  position: relative;
+  overflow: auto;
   background-color: white;
   color: black;
   height: 0vh
+}
+
+canvas {
+  display: inline-block;
+  width: 50%;
+  box-sizing: border-box;
+}
+
+#hourlyChartContainer {
+  display: flex;
+  flex-direction: column;
+  /*align-items: center;*/
+  width: 50%;
+  height: 100%;
+}
+
+#dayButtons {
+  display: flex;
+  justify-content: space-around;
+  position: absolute;
+  bottom: 0;
+  width: 50%;
+  padding: 10px;
 }
 
 #weather {

@@ -8,6 +8,8 @@ let directionsService;
 let directionsRenderer;
 let autocomplete;
 let originMarker;
+let hourlyData;
+const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 // function to get the data from the html template
 // converts the input to a string, then to a JSON object
@@ -197,7 +199,7 @@ function popWeatherCurrent(weather) {
             break;
         // Add more cases for each weather symbol and corresponding icon
         default:
-            weatherIcon.src = "static/icons/default.png"; // A default icon to use if the symbol is not recognized
+            weatherIcon.src = "static/icons/cloudy.png"; // A default icon to use if the symbol is not recognized
             break;
     }
 
@@ -687,7 +689,8 @@ function displayStations(routeFinder) {
         });
 
         row.querySelector('.show-graphs-btn').addEventListener('click', () => {
-            createChart(station);
+            // createChart(station);
+            graphs(station.stationNumber)
             updateLayout();
         });
 
@@ -734,38 +737,182 @@ function sortTable(table, columnIndex, order) {
 function updateLayout() {
     document.getElementById("map").style.height = "60vh";
     document.getElementById("graphs").style.height = "35vh";
+    const dayButtonsContainer = document.getElementById("dayButtons");
+    dayButtonsContainer.innerHTML = ""
+
+    days.forEach(day => {
+        const button = document.createElement("button");
+        button.textContent = day;
+        button.onclick = () => drawHourlyChart(day);
+        dayButtonsContainer.appendChild(button);
+    });
 }
 
-function createChart(station) {
-    const ctx = document.getElementById('myChart').getContext('2d');
+// function sending a post request with the station number to the backend
+async function graphs(station) {
+    fetch(`/graph`, {
+        method: "POST",
+        credentials: "include",
+        body: station,
+        cache: "no-cache",
+        headers: new Headers({
+            "content-type": "application/json"
+        })
+    })
+        .then((response) => response.json())
+        .then(async (data) => {
+            // store the response data in a variable for later use
+            hourlyData = data;
+            // draw the weekly chart
+            drawWeeklyChart(data);
+        });
+}
 
-    // destroy existing chart instance if it exists
-    if (window.myChart instanceof Chart) {
-        window.myChart.destroy();
+// function to draw weekly chart for a station
+function drawWeeklyChart(data) {
+
+    // destroy existing chart instances if they exists
+    if (window.weeklyChart instanceof Chart) {
+        window.weeklyChart.destroy();
+    }
+    if (window.hourlyChart instanceof Chart) {
+        window.hourlyChart.destroy();
     }
 
+    // prepare area and label
+    const ctx = document.getElementById('weeklyChart').getContext('2d');
+    const xLabels = days.flatMap(day => Array(24).fill(day));
+
+    // prepare data to be graphed
+    const bikesData = data.map(data => data.available_bikes);
+    const standsData = data.map(data => data.available_bike_stands);
+
+    // create stacked bar chart
     const chart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: ['Bikes', 'Stands'],
-            datasets: [{
-                label: 'Availability',
-                backgroundColor: ['#36A2EB', '#FF6384'],
-                data: [station.bikes, station.stands]
-            }]
+            labels: xLabels,
+            datasets: [
+                {
+                    label: 'Bikes',
+                    data: bikesData,
+                    backgroundColor: '#36A2EB'
+                },
+                {
+                    label: 'Stands',
+                    data: standsData,
+                    backgroundColor: '#dc690b'
+                }
+            ]
         },
         options: {
             scales: {
-                yAxes: [{
+                x: {
+                    stacked: true,
                     ticks: {
-                        beginAtZero: true
+                        autoSkip: true,
+                        maxTicksLimit: 7,
+                        align: "start"
+                    },
+                    grid: {
+                        display: false,
+                    },
+                    border: {
+                        display: true
                     }
-                }]
+                },
+                y: {
+                    stacked: true,
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top'
+                },
+                title: {
+                    display: true,
+                    text: 'Average availability across the week',
+                    fontSize: 20,
+                    fontStyle: 'bold'
+                }
             }
         }
     });
-    window.myChart = chart;
+    window.weeklyChart = chart;
 }
 
+// function to draw the hourly chart for a station on a specific day
+function drawHourlyChart(day) {
+
+    // destroy existing chart instance if it exists
+    if (window.hourlyChart instanceof Chart) {
+        window.hourlyChart.destroy();
+    }
+
+    // prepare area and labels
+    const ctx = document.getElementById('hourlyChart').getContext('2d');
+    const xLabels = Array.from({length: 24}, (_, index) => index);
+
+    // prepare data to be charte
+    const bikesData = hourlyData
+        .filter(hourlyData => hourlyData.day === day)
+        .map(hourlyData => hourlyData.available_bikes);
+    const standsData = hourlyData
+        .filter(hourlyData => hourlyData.day === day)
+        .map(hourlyData => hourlyData.available_bike_stands);
+
+    // draw hourly chart
+    const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: xLabels,
+            datasets: [
+                {
+                    label: 'Bikes',
+                    data: bikesData,
+                    backgroundColor: '#36A2EB'
+                },
+                {
+                    label: 'Stands',
+                    data: standsData,
+                    backgroundColor: '#dc690b'
+                }
+            ]
+        },
+        options: {
+            scales: {
+                x: {
+                    stacked: true,
+                    ticks: {
+                        autoSkip: true,
+                    },
+                    grid: {
+                        display: false,
+                    },
+                    border: {
+                        display: true
+                    }
+                },
+                y: {
+                    stacked: true,
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top'
+                },
+                title: {
+                    display: true,
+                    text: `Average availability on ${day}`,
+                    fontSize: 20,
+                    fontStyle: 'bold'
+                }
+            }
+        }
+    });
+    window.hourlyChart = chart;
+}
 
 window.initMap = initMap;

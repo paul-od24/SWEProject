@@ -7,6 +7,7 @@ from itertools import islice
 import dblogin
 import apilogin
 from availability_predict import availability_predict, multi_availability_predict
+from average import getChartData
 
 # creating the engine
 engine = create_engine(
@@ -140,5 +141,13 @@ def findClosest():
     return predictions
 
 
+@app.route("/graph", methods=["post"])
+def chart():
+    station_number = int(request.get_data(as_text=True))
+    print(station_number)
+
+    return getChartData(station_number)
+
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False)
