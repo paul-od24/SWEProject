@@ -195,33 +195,53 @@ th[sort-index]:hover {
 }
 
 button {
-display: inline-block;
-outline: none;
 cursor: pointer;
 font-size: 10px;
 line-height: 1;
-border-radius: 40px;
 transition-property: background-color,border-color,color,box-shadow,filter;
 transition-duration: .3s;
 border: 1px solid transparent;
-min-width: 60px;
-text-transform: uppercase;
 white-space: normal;
 font-weight: 700;
+text-transform: uppercase;
 text-align: center;
-color: #fff;
+color: black;
 background-color: #71a9f7;
 height: 48px;
+min-width: 30px;
+border-radius: 20px;
 }
-
-
 
 button:hover {
   transform: scale(1.04);
   background-color: #149911;
 }
+.primary {
+  display: inline-block;
+  outline: none;
+  cursor: pointer;
+  font-size: 10px;
+  line-height: 1;
+  border-radius: 40px;
+  transition-property: background-color,border-color,color,box-shadow,filter;
+  transition-duration: .3s;
+  border: 1px solid transparent;
+  min-width: 60px;
+  text-transform: uppercase;
+  white-space: normal;
+  font-weight: 700;
+  text-align: center;
+  color: #fff;
+  background-color: #71a9f7;
+  height: 48px;
+}
 
-#secondary {
+.primary:hover {
+  transform: scale(1.04);
+  background-color: #149911;
+}
+
+.secondary {
   background-color: #292F36;
   color: white;
   font-size: 1rem;
@@ -229,4 +249,8 @@ button:hover {
   border: none;
   cursor: pointer;
   border: 1px solid transparent;
+}
+.secondary:hover {
+  transform: scale(1.04);
+  background-color: #149911;
 }

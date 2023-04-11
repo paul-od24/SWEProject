@@ -437,7 +437,8 @@ async function sendLoc() {
     }
     let data = {
         "pinDic": pinDic,
-        "userloc": userloc
+        "userloc": userloc,
+        "time":selectedDateTime
     }
     fetch(`${window.origin}`, {
         method: "POST",
@@ -600,20 +601,33 @@ class RouteFinder {
     }
 }
 
-function setDateTime() {
-    const now = new Date();
-    const dateTimeInput = document.getElementById("datetime");
-    dateTimeInput.value = now.toISOString().slice(0, 16);
-}
-
 const dateTime = document.getElementById("datetime");
 
-// Get the value of the selected date and time
-dateTime.addEventListener("change", function () {
-    const selectedDateTime = dateTime.value;
-    console.log(selectedDateTime);
-});
+function setDateTime() {
+  const now = new Date();
+  const dateTimeInput = document.getElementById("datetime");
+  dateTimeInput.value = now.toISOString().slice(0, 16);
+}
 
+  // Get the value of the selected date and time
+  document.addEventListener("DOMContentLoaded", function() {
+    const dateTime = document.getElementById("datetime");
+  
+    // Get the value of the selected date and time
+    dateTime.addEventListener("change", function () {
+      const selectedDateTime = dateTime.value;
+      if (selectedDateTime) {
+        console.log(selectedDateTime);
+      } else {
+        console.log("Please select a date and time.");
+      }
+    });
+  });
+
+window.onload = function() {
+    setDateTime();
+};
+let selectedDateTime; // declare selectedDateTime as a global variable
 // create table to display station-info on webpage
 function displayStations(routeFinder) {
     const stationsContainer = document.getElementById('stations-container');
