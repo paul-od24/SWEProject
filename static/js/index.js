@@ -10,6 +10,7 @@ let autocomplete;
 let originMarker;
 let hourlyData;
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+let selectedDateTime; // declare selectedDateTime as a global variable
 
 // function to get the data from the html template
 // converts the input to a string, then to a JSON object
@@ -633,8 +634,11 @@ function setDateTime() {
 
 window.onload = function() {
     setDateTime();
+    // store initial time value in selectedDateTime
+    const dateTime = document.getElementById("datetime");
+    selectedDateTime = dateTime.value;
 };
-let selectedDateTime; // declare selectedDateTime as a global variable
+
 // create table to display station-info on webpage
 function displayStations(routeFinder) {
     const stationsContainer = document.getElementById('stations-container');
