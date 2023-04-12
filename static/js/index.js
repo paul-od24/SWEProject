@@ -10,6 +10,8 @@ let autocomplete;
 let originMarker;
 let hourlyData;
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+// weekdays used for converting date.getDay() to day of week
+const weekdays = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 let selectedDateTime; // declare selectedDateTime as a global variable
 
 // function to get the data from the html template
@@ -863,6 +865,10 @@ function drawWeeklyChart(data) {
         }
     });
     window.weeklyChart = chart;
+    // display chart for current (selected) day
+    let curDay = new Date(Date.parse(selectedDateTime));
+    curDay = weekdays[curDay.getDay()];
+    drawHourlyChart(curDay);
 }
 
 // function to draw the hourly chart for a station on a specific day
