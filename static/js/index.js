@@ -83,6 +83,13 @@ function initMap() {
             infowindow.close();
         });
 
+        // Create and show graphs for station when marker is clicked
+        google.maps.event.addListener(stationMarker, "click", function () {
+             // createChart(station)
+             graphs(i);
+             updateLayout();
+        });
+
         console.log("Added marker for station " + pinDic[i]["number"]); // added for debugging
         stations[pinDic[i]["number"]] = stationMarker;
     }
