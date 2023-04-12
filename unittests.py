@@ -1,8 +1,9 @@
 import unittest
 import datetime
 import time
-from selenium import webdriver
 from parameterized import parameterized_class
+from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.wait import WebDriverWait
@@ -139,14 +140,18 @@ class DBikesTests(unittest.TestCase):
     # test if availability table is populated correctly for different date/time values
     def test_availability_table(self):
         date_time_scenarios = [
-            {"date": "12052023", "time": "15:00"},
+            {"date": "12052023", "time": "00:00"},
             {"date": "13061960", "time": "09:00"},
             {"date": "24122050", "time": "23:00"},
-            {"date": "15042023", "time": "00:00"},
+            {"date": "15043000", "time": "12:00"},
+            {"date": "15041000", "time": "12:00"},
+            {"date": "29022023", "time": "12:00"},
+
         ]
 
-        # loop through different date/time scenarions
+        # loop through different date/time scenarios
         for date_time_scenario in date_time_scenarios:
+            self.driver.get("http://127.0.0.1:5000/")
             with self.subTest(date=date_time_scenario["date"], time=date_time_scenario["time"]):
                 self._test_availability_table_scenario(date_time_scenario)
 
@@ -195,7 +200,12 @@ class DBikesTests(unittest.TestCase):
     # helper method to check table contents for test_availability_table
     def _check_table(self):
         driver = self.driver
-        table = driver.find_element(By.CSS_SELECTOR, ".stations-table tbody")
+        try:
+            table = driver.find_element(By.CSS_SELECTOR, ".stations-table tbody")
+        except NoSuchElementException:
+            datetime_value = driver.find_element(By.ID, "datetime").get_attribute("value")
+            search_bar_value = driver.find_element(By.ID, "autocomplete_search").get_attribute("value")
+            raise AssertionError(f"Table not loaded.\nDate/Time: {datetime_value}\nLocation: {search_bar_value}")
         rows = table.find_elements(By.TAG_NAME, "tr")
 
         # list to check if any of the numeric columns is all 0s
