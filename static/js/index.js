@@ -635,6 +635,10 @@ function displayStations(routeFinder) {
     // clearing any previous content
     stationsContainer.innerHTML = '';
 
+    // creating table wrapper
+    const tableWrapper = document.createElement('div');
+    tableWrapper.className = 'table-wrapper';
+
     // creating table
     const table = document.createElement('table');
     table.className = 'stations-table';
@@ -655,7 +659,7 @@ function displayStations(routeFinder) {
     // add headers to table
     table.appendChild(tableHeader);
 
-    // make table sortable
+    // add event listeners for sorting
     tableHeader.querySelectorAll('th[sort-index]').forEach(header => {
         header.addEventListener('click', () => {
             const columnIndex = parseInt(header.getAttribute('sort-index'));
@@ -696,27 +700,29 @@ function displayStations(routeFinder) {
             <td><button class="show-graphs-btn">Show Graphs</button></td>
         `;
 
+        // add listener for show route
         row.querySelector('.show-route-btn').addEventListener('click', () => {
             routeFinder.showRoute(index);
         });
 
+        // add listener for show graphs
         row.querySelector('.show-graphs-btn').addEventListener('click', () => {
-            // createChart(station);
             graphs(station.stationNumber)
             updateLayout();
         });
 
-
         tableBody.appendChild(row);
     });
+
     // add body to table
     table.appendChild(tableBody);
-    stationsContainer.appendChild(table);
+    tableWrapper.appendChild(table);
+    stationsContainer.appendChild(tableWrapper);
 
     // sort table by distance initially
-    sortTable(table, 2, 'asc');
+    sortTable(table, 1, 'asc');
     // display correct sorting symbol
-    const distanceHeader = tableHeader.querySelector('th[sort-index="2"]');
+    const distanceHeader = tableHeader.querySelector('th[sort-index="1"]');
     const distanceSymbolSpan = distanceHeader.querySelector('.sort-symbol');
     distanceSymbolSpan.textContent = '▲';
 }

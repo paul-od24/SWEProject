@@ -1,59 +1,118 @@
-#main_div {
-  display: flex;
-}
 body {
   background-color: #fdf5bf;
   color: #0a100d;
 }
 
+#main_div {
+  display: flex;
+  height: 97vh;
+}
 
 #map_and_graphs {
-  height: 95vh;
-  width: 60%;
   display: flex;
   flex-direction: column;
+  flex-grow: 1;
+  max-height: 95vh;
+  order: 0;
+  margin-right: 0.5rem;
 }
 
 #map {
-  height: 95vh;
-  width:100%;
+  flex: 1;
 }
 
 #graphs {
-  width: 100%;
   display: flex;
-  position: relative;
-  overflow: auto;
-  background-color: white;
-  color: black;
-  height: 0vh
+  flex-direction: row;
+  height: 0;
+}
+
+#info_panel {
+  flex: 1;
+  min-width: 35%;
+  display: flex;
+  flex-direction: column;
+  /*max-height: 97vh;*/
+  order: 1;
+  margin-left: 0.5rem;
+}
+
+#weather {
+  flex: 1;
+}
+
+#stations-container {
+  flex-grow: 1;
+  overflow-y: auto;
+  font-size: 0.8rem;
 }
 
 canvas {
   display: inline-block;
-  width: 50%;
   box-sizing: border-box;
 }
 
 #hourlyChartContainer {
   display: flex;
   flex-direction: column;
-  /*align-items: center;*/
-  width: 50%;
+  flex: 1;
   height: 100%;
+}
+
+#hourlyChart {
+  flex: 1;
+  height: 0;
+}
+
+@media (max-width: 768px) {
+  #main_div {
+    flex-direction: column;
+    height: auto;
+  }
+
+  #map_and_graphs {
+    height: auto;
+    order: 2;
+  }
+
+  #map {
+    flex: none;
+    height: 300px;
+    margin-top: 1rem;
+  }
+
+  #graphs {
+    flex-direction: column;
+    height: auto;
+  }
+
+  #hourlyChartContainer {
+    height: auto;
+  }
+
+  #info_panel {
+    min-width: 100%;
+    order: 1;
+    max-height: none;
+  }
+
+  #stations-container {
+    height: auto;
+    max-height: none;
+    overflow-y: visible;
+  }
 }
 
 #dayButtons {
   display: flex;
-  justify-content: space-around;
-  position: absolute;
-  bottom: 0;
-  width: 50%;
-  padding: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 5px;
 }
 
-#weather {
-  width: 40%;
+#dayButtons button {
+  font-size: 0.7rem;
+  height: 1rem;
 }
 
 
@@ -62,7 +121,6 @@ canvas {
   height: 20px;
   background-color: black;
   color: white;
-
 }
 
 .info-window {
@@ -100,27 +158,39 @@ canvas {
   display: none;
 }
 
+.table-wrapper {
+  overflow: auto;
+  max-height: 95%;
+  border: 1px solid black;
+}
+
 table {
   border-collapse: collapse;
-  margin-bottom: 1em;
-  border: 1px solid black;
-  color: black;
+  width: 100%;
+}
+
+tbody {
   background-color: white;
 }
+
 td, th {
   padding: 0.5em;
   text-align: center;
-  border: 1px solid black;
 }
 
 th {
   background-color: #71A9F7;
   color: white;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  box-shadow: 0 1px 0 black;
 }
 
 th[sort-index]:hover {
-    cursor: pointer;
+  cursor: pointer;
 }
+
 
 #weather_key {
   border: 1px solid black;
@@ -182,16 +252,8 @@ th[sort-index]:hover {
   }
 }
 
-
 #myChart{
   width: 100%;
-}
-
-#stations-container {
-  position: flex;
-  margin-top: 15px;
-  height: 100px;
-
 }
 
 button {
@@ -253,4 +315,8 @@ button:hover {
 .secondary:hover {
   transform: scale(1.04);
   background-color: #149911;
+}
+.stations-table {
+  overflow-y: auto;
+  max-height: calc(100% - 4rem); /* Adjust this value to fit the desired max height */
 }
