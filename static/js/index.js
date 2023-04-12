@@ -10,6 +10,9 @@ let autocomplete;
 let originMarker;
 let hourlyData;
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+// weekdays used for converting date.getDay() to day of week
+const weekdays = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+let selectedDateTime; // declare selectedDateTime as a global variable
 
 // function to get the data from the html template
 // converts the input to a string, then to a JSON object
@@ -81,6 +84,13 @@ function initMap() {
         // Hide the InfoWindow when you move away from the marker
         google.maps.event.addListener(stationMarker, "mouseout", function () {
             infowindow.close();
+        });
+
+        // Create and show graphs for station when marker is clicked
+        google.maps.event.addListener(stationMarker, "click", function () {
+             // createChart(station)
+             graphs(i);
+             updateLayout();
         });
 
         console.log("Added marker for station " + pinDic[i]["number"]); // added for debugging
@@ -626,8 +636,11 @@ function setDateTime() {
 
 window.onload = function() {
     setDateTime();
+    // store initial time value in selectedDateTime
+    const dateTime = document.getElementById("datetime");
+    selectedDateTime = dateTime.value;
 };
-let selectedDateTime; // declare selectedDateTime as a global variable
+
 // create table to display station-info on webpage
 function displayStations(routeFinder) {
     const stationsContainer = document.getElementById('stations-container');
@@ -858,6 +871,10 @@ function drawWeeklyChart(data) {
         }
     });
     window.weeklyChart = chart;
+    // display chart for current (selected) day
+    let curDay = new Date(Date.parse(selectedDateTime));
+    curDay = weekdays[curDay.getDay()];
+    drawHourlyChart(curDay);
 }
 
 // function to draw the hourly chart for a station on a specific day
