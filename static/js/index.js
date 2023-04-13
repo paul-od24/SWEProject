@@ -1,5 +1,6 @@
 // define with a global scope so setPinDic and initMap can both access it
 let pinDic; // object to store the pin data
+let map;
 const stations = {}; // object to store the markers
 const dublin = {lat: 53.3498, lng: -6.2603}; // the location Dublin
 let userloc; // the user location
@@ -24,7 +25,7 @@ function setPinDic(data) {
 // Initialize and add the map
 function initMap() {
     // The map, centered at Dublin
-    const map = new google.maps.Map(document.getElementById("map"), {
+    map = new google.maps.Map(document.getElementById("map"), {
         zoom: 14,
         center: dublin,
     });
@@ -93,7 +94,7 @@ function initMap() {
              updateLayout();
         });
 
-        console.log("Added marker for station " + pinDic[i]["number"]); // added for debugging
+        // console.log("Added marker for station " + pinDic[i]["number"]); // added for debugging
         stations[pinDic[i]["number"]] = stationMarker;
     }
     // call the autocomplete function
@@ -167,19 +168,9 @@ function changeIconsii() {
 
 // populate current weather table
 function popWeatherCurrent(weather) {
-    // Get a reference to the current weather div
-    var currentWeatherDiv = document.getElementById("weather_cur");
-
-    // Create a header element for the current weather
-    var currentWeatherHeader = document.createElement("h2");
-    currentWeatherHeader.innerText = "Current Weather";
-    currentWeatherDiv.appendChild(currentWeatherHeader);
-
-    // Create a paragraph element for the weather data
-    var currentWeatherData = document.createElement("p");
 
     // Create an image element for the weather icon
-    var weatherIcon = document.createElement("img");
+    var weatherIcon = document.getElementById("weather_icon");
 
     // Set the src attribute of the weather icon based on the weather symbol
     switch (weather.symbol) {
@@ -213,106 +204,102 @@ function popWeatherCurrent(weather) {
             break;
     }
 
-    // Add the weather icon to the paragraph element
-    currentWeatherData.appendChild(weatherIcon);
+    // Create an image element for the weather icon
+    var weatherData = document.getElementById("weather_data")
 
     // Add precipitation and temperature data to the paragraph element
-    currentWeatherData.innerHTML += "<br><span style='font-size:25px; font-weight:bold;'>Temperature:</span> " + weather.temp + "°C 🔆<br>" +
-        "<span style='font-size:25px; font-weight:bold;'>Precipitation:</span> " + weather.rain + "mm ☔";
-
-
-    // Add the weather data to the current weather div
-    currentWeatherDiv.appendChild(currentWeatherData);
+    weatherData.innerHTML += "<div><span style='font-size:20px; font-weight:bold;'>Temperature:</span> " + weather.temp + "°C 🔆</div>" +
+        "<div><span style='font-size:20px; font-weight:bold;'>Precipitation:</span> " + weather.rain + "mm ☔</div>";
 }
 
-// populate next 48 hours weather table
-function popWeather48(weatherDict) {
-    // setup table head
-    let weather = '<th colspan="';
-    weather += "3";
-    weather += '">Weather Next 48hrs</th>';
-    // create array of table rows
-    let rows = [];
-    // begin each table row
-    for (let i = 0; i < 3; ++i) {
-        rows[i] = '<tr>';
-    }
-    // i tracks current hour
-    let i = 0;
-    // loop through each key in our weather dictionary
-    for (var key in weatherDict) {
-        // split the ket by ' '
-        splitKey = key.split(' ');
-        // add new cell to each row
-        for (let j = 0; j < rows.length; ++j) {
-            rows[j] += '<td>';
-        }
-        // add time to row 1
-        rows[0] += splitKey[1];
-        // add symbol to row 2
-        rows[1] += weatherDict[key]['symbol'];
-        // add rain data to row 3
-        rows[2] += weatherDict[key]['rain'];
-        // end cell in each row
-        for (let j = 0; j < rows.length; ++j) {
-            rows[j] += '</td>';
-        }
-        // exit loop if we have 48 hours
-        if (i >= 48) {
-            break;
-        }
-        i++;
-    }
-    // end each row and add to table
-    for (let j = 0; j < rows.length; ++j) {
-        rows[j] += '</tr>';
-        weather += rows[j];
-    }
-    // insret table into html
-    document.getElementById("weather_48").innerHTML = weather;
-}
-
-// populate next week weather table
-function popWeatherWeek(weatherDict) {
-    // setup table head
-    let weather = '<th colspan="';
-    weather += "4";
-    weather += '">Weather Next Week</th>';
-    // create array of table rows
-    let rows = [];
-    // begin each table row
-    for (let i = 0; i < 3; ++i) {
-        rows[i] = '<tr>';
-    }
-    // loop through each key in our weather dictionary
-    for (var key in weatherDict) {
-        // split the key by ' '
-        splitKey = key.split(' ');
-        // we take a snapshot of weather data at midday
-        if (splitKey[1] == '12:00:00') {
-            for (let j = 0; j < rows.length; ++j) {
-                // add new cell to each row
-                rows[j] += '<td>';
-            }
-            // add day to row 1
-            rows[0] += splitKey[0].split('-')[2];
-            // add symbol to row 2
-            rows[1] += weatherDict[key]['symbol'];
-            // add rain data to row 3
-            rows[2] += weatherDict[key]['rain'];
-            // end cell in each row
-            for (let j = 0; j < rows.length; ++j) {
-                rows[j] += '</td>';
-            }
-        }
-    }
-    // end each row and add to table
-    for (let j = 0; j < rows.length; ++j) {
-        rows[j] += '</tr>';
-        weather += rows[j];
-    }
-    document.getElementById("weather_week").innerHTML = weather;
-}
+// // populate next 48 hours weather table
+// function popWeather48(weatherDict) {
+//     // setup table head
+//     let weather = '<th colspan="';
+//     weather += "3";
+//     weather += '">Weather Next 48hrs</th>';
+//     // create array of table rows
+//     let rows = [];
+//     // begin each table row
+//     for (let i = 0; i < 3; ++i) {
+//         rows[i] = '<tr>';
+//     }
+//     // i tracks current hour
+//     let i = 0;
+//     // loop through each key in our weather dictionary
+//     for (var key in weatherDict) {
+//         // split the ket by ' '
+//         splitKey = key.split(' ');
+//         // add new cell to each row
+//         for (let j = 0; j < rows.length; ++j) {
+//             rows[j] += '<td>';
+//         }
+//         // add time to row 1
+//         rows[0] += splitKey[1];
+//         // add symbol to row 2
+//         rows[1] += weatherDict[key]['symbol'];
+//         // add rain data to row 3
+//         rows[2] += weatherDict[key]['rain'];
+//         // end cell in each row
+//         for (let j = 0; j < rows.length; ++j) {
+//             rows[j] += '</td>';
+//         }
+//         // exit loop if we have 48 hours
+//         if (i >= 48) {
+//             break;
+//         }
+//         i++;
+//     }
+//     // end each row and add to table
+//     for (let j = 0; j < rows.length; ++j) {
+//         rows[j] += '</tr>';
+//         weather += rows[j];
+//     }
+//     // insret table into html
+//     document.getElementById("weather_48").innerHTML = weather;
+// }
+//
+// // populate next week weather table
+// function popWeatherWeek(weatherDict) {
+//     // setup table head
+//     let weather = '<th colspan="';
+//     weather += "4";
+//     weather += '">Weather Next Week</th>';
+//     // create array of table rows
+//     let rows = [];
+//     // begin each table row
+//     for (let i = 0; i < 3; ++i) {
+//         rows[i] = '<tr>';
+//     }
+//     // loop through each key in our weather dictionary
+//     for (var key in weatherDict) {
+//         // split the key by ' '
+//         splitKey = key.split(' ');
+//         // we take a snapshot of weather data at midday
+//         if (splitKey[1] == '12:00:00') {
+//             for (let j = 0; j < rows.length; ++j) {
+//                 // add new cell to each row
+//                 rows[j] += '<td>';
+//             }
+//             // add day to row 1
+//             rows[0] += splitKey[0].split('-')[2];
+//             // add symbol to row 2
+//             rows[1] += weatherDict[key]['symbol'];
+//             // add rain data to row 3
+//             rows[2] += weatherDict[key]['rain'];
+//             // end cell in each row
+//             for (let j = 0; j < rows.length; ++j) {
+//                 rows[j] += '</td>';
+//             }
+//         }
+//     }
+//     // end each row and add to table
+//     for (let j = 0; j < rows.length; ++j) {
+//         rows[j] += '</tr>';
+//         weather += rows[j];
+//     }
+//     document.getElementById("weather_week").innerHTML = weather;
+// }
 
 function autocomplete_init() {
     google.maps.event.addDomListener(window, 'load', initialize);
@@ -611,8 +598,6 @@ class RouteFinder {
     }
 }
 
-const dateTime = document.getElementById("datetime");
-
 function setDateTime() {
   const now = new Date();
   const dateTimeInput = document.getElementById("datetime");
@@ -639,11 +624,22 @@ window.onload = function() {
     // store initial time value in selectedDateTime
     const dateTime = document.getElementById("datetime");
     selectedDateTime = dateTime.value;
+
+    setWeatherTitleWidth();
+    window.addEventListener('resize', setWeatherTitleWidth);
 };
+
+function setWeatherTitleWidth() {
+  const weather = document.getElementById('weather');
+  const weatherTitle = document.getElementById('weather_title');
+  const weatherWidth = weather.offsetWidth;
+
+  weatherTitle.style.width = `${weatherWidth}px`;
+}
 
 // create table to display station-info on webpage
 function displayStations(routeFinder) {
-    const stationsContainer = document.getElementById('stations-container');
+    const stationsContainer = document.getElementById('stations_container');
 
     // clearing any previous content
     stationsContainer.innerHTML = '';
@@ -724,6 +720,8 @@ function displayStations(routeFinder) {
             updateLayout();
         });
 
+        row.onclick = () => highlightRow(row, station.position)
+
         tableBody.appendChild(row);
     });
 
@@ -738,6 +736,19 @@ function displayStations(routeFinder) {
     const distanceHeader = tableHeader.querySelector('th[sort-index="1"]');
     const distanceSymbolSpan = distanceHeader.querySelector('.sort-symbol');
     distanceSymbolSpan.textContent = '▲';
+}
+
+function highlightRow(row, position) {
+    // remove old highlight
+    const rows = document.querySelectorAll('tr');
+    rows.forEach((r) => r.classList.remove("highlighted-row"));
+
+    // highlight clicked row
+    row.classList.add("highlighted-row");
+
+    // pan to selected station
+    map.panTo(position)
+    map.setZoom(20)
 }
 
 // function to sort table by column values
@@ -889,7 +900,7 @@ function drawHourlyChart(day) {
     const ctx = document.getElementById('hourlyChart').getContext('2d');
     const xLabels = Array.from({length: 24}, (_, index) => index);
 
-    // prepare data to be charte
+    // prepare data to be charted
     const bikesData = hourlyData
         .filter(hourlyData => hourlyData.day === day)
         .map(hourlyData => hourlyData.available_bikes);
@@ -940,7 +951,7 @@ function drawHourlyChart(day) {
                 },
                 title: {
                     display: true,
-                    text: `Average availability on ${day}`,
+                    text: `Average availability on a ${day}`,
                     fontSize: 20,
                     fontStyle: 'bold'
                 }
@@ -948,6 +959,18 @@ function drawHourlyChart(day) {
         }
     });
     window.hourlyChart = chart;
+}
+
+// function to make the help overlay appear/disappear
+function toggleHelpOverlay() {
+  let overlay = document.getElementById("help_overlay");
+  if (overlay.classList.contains("overlay_hidden")) {
+    overlay.classList.remove("overlay_hidden");
+    overlay.classList.add("overlay_visible");
+  } else {
+    overlay.classList.remove("overlay_visible");
+    overlay.classList.add("overlay_hidden");
+  }
 }
 
 window.initMap = initMap;
