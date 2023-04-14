@@ -445,6 +445,13 @@ async function sendLoc() {
         showErrorMessage(error)
         return
     }
+    let selectedDate = new Date(selectedDateTime);
+    if (selectedDate.getFullYear() < 2023 || selectedDate.getFullYear() > 2043) {
+        const error = new Error("Please esnure the date you selected is after 2023 and not more than 20 years into the future.")
+        error.custom = true
+        showErrorMessage(error)
+        return
+    }
     let data = {
         "pinDic": pinDic,
         "userloc": userloc,
@@ -611,7 +618,7 @@ class RouteFinder {
     }
 }
 
-const dateTime = document.getElementById("datetime");
+dateTime = document.getElementById("datetime");
 
 function setDateTime() {
   const now = new Date();
