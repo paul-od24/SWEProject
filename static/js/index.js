@@ -12,7 +12,7 @@ let originMarker;
 let hourlyData;
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 // weekdays used for converting date.getDay() to day of week
-const weekdays = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 let selectedDateTime; // declare selectedDateTime as a global variable
 
 // function to get the data from the html template
@@ -43,8 +43,8 @@ function initMap() {
 
     // variable that stores the location of the bike stations icon
     //var image = {
-      //  url: "/static/icons/bike_icon.png",
-       // scaledSize: new google.maps.Size(20, 20)
+    //  url: "/static/icons/bike_icon.png",
+    // scaledSize: new google.maps.Size(20, 20)
     //};
 
 
@@ -89,9 +89,9 @@ function initMap() {
 
         // Create and show graphs for station when marker is clicked
         google.maps.event.addListener(stationMarker, "click", function () {
-             // createChart(station)
-             graphs(i);
-             updateLayout();
+            // createChart(station)
+            graphs(i);
+            updateLayout();
         });
 
         // console.log("Added marker for station " + pinDic[i]["number"]); // added for debugging
@@ -102,17 +102,17 @@ function initMap() {
 
     // Add event listeners to buttons
     const button1 = document.querySelector("#button1");
-    button1.addEventListener("click", function() {
+    button1.addEventListener("click", function () {
         changeIcons("red");
     });
-    
+
     const button2 = document.querySelector("#button2");
-    button2.addEventListener("click", function() {
+    button2.addEventListener("click", function () {
         changeIcons("default");
     });
-    
+
     const button3 = document.querySelector("#button3");
-    button3.addEventListener("click", function() {
+    button3.addEventListener("click", function () {
         changeIcons("bikes");
     });
 }
@@ -435,7 +435,7 @@ async function sendLoc() {
     let data = {
         "pinDic": pinDic,
         "userloc": userloc,
-        "time":selectedDateTime
+        "time": selectedDateTime
     }
     fetch(`${window.origin}`, {
         method: "POST",
@@ -599,27 +599,26 @@ class RouteFinder {
 }
 
 function setDateTime() {
-  const now = new Date();
-  const dateTimeInput = document.getElementById("datetime");
-  dateTimeInput.value = now.toISOString().slice(0, 16);
+    const dateTimeInput = document.getElementById("datetime");
+    dateTimeInput.value = moment().tz('Europe/Dublin').format('YYYY-MM-DDTHH:mm')
 }
 
-  // Get the value of the selected date and time
-  document.addEventListener("DOMContentLoaded", function() {
+// Get the value of the selected date and time
+document.addEventListener("DOMContentLoaded", function () {
     const dateTime = document.getElementById("datetime");
-  
+
     // Get the value of the selected date and time
     dateTime.addEventListener("change", function () {
-      selectedDateTime = dateTime.value;
-      if (selectedDateTime) {
-        console.log(selectedDateTime);
-      } else {
-        console.log("Please select a date and time.");
-      }
+        selectedDateTime = dateTime.value;
+        if (selectedDateTime) {
+            console.log(selectedDateTime);
+        } else {
+            console.log("Please select a date and time.");
+        }
     });
-  });
+});
 
-window.onload = function() {
+window.onload = function () {
     setDateTime();
     // store initial time value in selectedDateTime
     const dateTime = document.getElementById("datetime");
@@ -630,11 +629,11 @@ window.onload = function() {
 };
 
 function setWeatherTitleWidth() {
-  const weather = document.getElementById('weather');
-  const weatherTitle = document.getElementById('weather_title');
-  const weatherWidth = weather.offsetWidth;
+    const weather = document.getElementById('weather');
+    const weatherTitle = document.getElementById('weather_title');
+    const weatherWidth = weather.offsetWidth;
 
-  weatherTitle.style.width = `${weatherWidth}px`;
+    weatherTitle.style.width = `${weatherWidth}px`;
 }
 
 // create table to display station-info on webpage
@@ -963,14 +962,14 @@ function drawHourlyChart(day) {
 
 // function to make the help overlay appear/disappear
 function toggleHelpOverlay() {
-  let overlay = document.getElementById("help_overlay");
-  if (overlay.classList.contains("overlay_hidden")) {
-    overlay.classList.remove("overlay_hidden");
-    overlay.classList.add("overlay_visible");
-  } else {
-    overlay.classList.remove("overlay_visible");
-    overlay.classList.add("overlay_hidden");
-  }
+    let overlay = document.getElementById("help_overlay");
+    if (overlay.classList.contains("overlay_hidden")) {
+        overlay.classList.remove("overlay_hidden");
+        overlay.classList.add("overlay_visible");
+    } else {
+        overlay.classList.remove("overlay_visible");
+        overlay.classList.add("overlay_hidden");
+    }
 }
 
 window.initMap = initMap;

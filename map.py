@@ -123,7 +123,6 @@ def findClosest():
         d = distance.distance(userloc, station).m
         d_dic[i] = d
     d_dic_sorted = dict(sorted(d_dic.items(), key=lambda item: item[1]))
-    print(d_dic_sorted)
 
     closest = dict(islice(d_dic_sorted.items(), 10))
 
@@ -132,14 +131,17 @@ def findClosest():
     for i in closest.keys():
         stations.append(str(i))
 
-    # pass list of stations and time to model
-    res = multi_availability_predict(stations, time, engine)
-
-    for i in closest.keys():
-        # TODO call prediction function and map returned values to bikes/stands
-        #bikes, stands = pinDic[i].get("available_bikes"), pinDic[i].get("available_bike_stands")
-        bikes, stands = res[i][0], res[i][1]
-        predictions[i] = {"dist": closest[i], "bikes": bikes, "stands": stands}
+    # check if entered time is more than 15 minutes in the future
+    if input_datetime > datetime.datetime.now() + datetime.timedelta(minutes=15):
+        # pass list of stations and time to model
+        res = multi_availability_predict(stations, time, engine)
+        for i in closest.keys():
+            bikes, stands = res[i][0], res[i][1]
+            predictions[i] = {"dist": closest[i], "bikes": bikes, "stands": stands}
+    else:
+        for i in closest.keys():
+            bikes, stands = pinDic[i].get("available_bikes"), pinDic[i].get("available_bike_stands")
+            predictions[i] = {"dist": closest[i], "bikes": bikes, "stands": stands}
 
     return predictions
 
