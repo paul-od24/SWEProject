@@ -40,14 +40,6 @@ function initMap() {
     // Create an InfoWindow object
     const infowindow = new google.maps.InfoWindow();
 
-
-    // variable that stores the location of the bike stations icon
-    //var image = {
-    //  url: "/static/icons/bike_icon.png",
-    // scaledSize: new google.maps.Size(20, 20)
-    //};
-
-
     // looping through the pins and adding them to the map
     for (let i in pinDic) {
         const availableBikes = pinDic[i]["available_bikes"];
@@ -212,95 +204,6 @@ function popWeatherCurrent(weather) {
         "<div><span style='font-size:20px; font-weight:bold;'>Precipitation:</span> " + weather.rain + "mm ☔</div>";
 }
 
-// // populate next 48 hours weather table
-// function popWeather48(weatherDict) {
-//     // setup table head
-//     let weather = '<th colspan="';
-//     weather += "3";
-//     weather += '">Weather Next 48hrs</th>';
-//     // create array of table rows
-//     let rows = [];
-//     // begin each table row
-//     for (let i = 0; i < 3; ++i) {
-//         rows[i] = '<tr>';
-//     }
-//     // i tracks current hour
-//     let i = 0;
-//     // loop through each key in our weather dictionary
-//     for (var key in weatherDict) {
-//         // split the ket by ' '
-//         splitKey = key.split(' ');
-//         // add new cell to each row
-//         for (let j = 0; j < rows.length; ++j) {
-//             rows[j] += '<td>';
-//         }
-//         // add time to row 1
-//         rows[0] += splitKey[1];
-//         // add symbol to row 2
-//         rows[1] += weatherDict[key]['symbol'];
-//         // add rain data to row 3
-//         rows[2] += weatherDict[key]['rain'];
-//         // end cell in each row
-//         for (let j = 0; j < rows.length; ++j) {
-//             rows[j] += '</td>';
-//         }
-//         // exit loop if we have 48 hours
-//         if (i >= 48) {
-//             break;
-//         }
-//         i++;
-//     }
-//     // end each row and add to table
-//     for (let j = 0; j < rows.length; ++j) {
-//         rows[j] += '</tr>';
-//         weather += rows[j];
-//     }
-//     // insret table into html
-//     document.getElementById("weather_48").innerHTML = weather;
-// }
-//
-// // populate next week weather table
-// function popWeatherWeek(weatherDict) {
-//     // setup table head
-//     let weather = '<th colspan="';
-//     weather += "4";
-//     weather += '">Weather Next Week</th>';
-//     // create array of table rows
-//     let rows = [];
-//     // begin each table row
-//     for (let i = 0; i < 3; ++i) {
-//         rows[i] = '<tr>';
-//     }
-//     // loop through each key in our weather dictionary
-//     for (var key in weatherDict) {
-//         // split the key by ' '
-//         splitKey = key.split(' ');
-//         // we take a snapshot of weather data at midday
-//         if (splitKey[1] == '12:00:00') {
-//             for (let j = 0; j < rows.length; ++j) {
-//                 // add new cell to each row
-//                 rows[j] += '<td>';
-//             }
-//             // add day to row 1
-//             rows[0] += splitKey[0].split('-')[2];
-//             // add symbol to row 2
-//             rows[1] += weatherDict[key]['symbol'];
-//             // add rain data to row 3
-//             rows[2] += weatherDict[key]['rain'];
-//             // end cell in each row
-//             for (let j = 0; j < rows.length; ++j) {
-//                 rows[j] += '</td>';
-//             }
-//         }
-//     }
-//     // end each row and add to table
-//     for (let j = 0; j < rows.length; ++j) {
-//         rows[j] += '</tr>';
-//         weather += rows[j];
-//     }
-//     document.getElementById("weather_week").innerHTML = weather;
-// }
-
 function autocomplete_init() {
     google.maps.event.addDomListener(window, 'load', initialize);
 }
@@ -434,7 +337,7 @@ async function sendLoc() {
     }
     let selectedDate = new Date(selectedDateTime);
     if (selectedDate.getFullYear() < 2023 || selectedDate.getFullYear() > 2043) {
-        const error = new Error("Please esnure the date you selected is after 2023 and not more than 20 years into the future.")
+        const error = new Error("Please ensure the date you selected is after 2023 and not more than 20 years into the future.")
         error.custom = true
         showErrorMessage(error)
         return
@@ -609,7 +512,7 @@ dateTime = document.getElementById("datetime");
 
 function setDateTime() {
     const dateTimeInput = document.getElementById("datetime");
-    dateTimeInput.value = moment().tz('Europe/Dublin').format('YYYY-MM-DDTHH:mm')
+    dateTimeInput.value = dayjs().tz('Europe/Dublin').format('YYYY-MM-DDTHH:mm');
 }
 
 // Get the value of the selected date and time

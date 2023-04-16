@@ -11,7 +11,7 @@ def getChartData(station_number):
         echo=True)
 
     # load data into a DataFrame
-    df = pd.read_sql(f'SELECT * FROM availability WHERE number = {station_number}', engine)
+    df = pd.read_sql(f'SELECT * FROM availability WHERE number = {station_number} ORDER BY last_update DESC LIMIT 10080', engine)
 
     # convert Unix timestamp to datetime
     df['last_update'] = pd.to_datetime(df['last_update'], unit='s')

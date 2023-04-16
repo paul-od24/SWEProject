@@ -1,4 +1,5 @@
 import json
+import pytz
 from flask import Flask, render_template, request
 import sqlalchemy as sqla
 from sqlalchemy import create_engine, select, text
@@ -48,7 +49,7 @@ weather_forecast = sqla.Table("weather_forecast", metadataWF,
 app = Flask(__name__, template_folder="./templates")
 
 
-def update_data(pinDic, wCur, wetDic):
+def update_data(pinDic, wCur):
     """
     Function that gets the latest bike and weather data and stores it in the appropriate dictionaries.
     Returns: void
@@ -78,15 +79,6 @@ def update_data(pinDic, wCur, wetDic):
         wCur["rain"] = res.rain
         wCur["temp"] = res.temp
 
-    # preparing sql statement to get current weather
-    stmt = select(weather_forecast.c.end, weather_forecast.c.symbol, weather_forecast.c.rain_hourly)
-
-    # executing sql statement
-    with engine.begin() as connection:
-        for row in connection.execute(stmt):
-            data = {"symbol": row.symbol, "rain": row.rain_hourly}
-            wetDic[str(row.end)] = data
-
 
 @app.route("/")
 def mapview():
@@ -97,11 +89,9 @@ def mapview():
     """
     pinDic = {}
     wCur = {}
-    wetDic = {}
 
-    update_data(pinDic, wCur, wetDic)
-    return render_template('index.html', dic=json.dumps(pinDic), mapkey=apilogin.MAPKEY, wCur=json.dumps(wCur),
-                           wetDic=json.dumps(wetDic))
+    update_data(pinDic, wCur)
+    return render_template('index.html', dic=json.dumps(pinDic), mapkey=apilogin.MAPKEY, wCur=json.dumps(wCur))
 
 
 @app.route("/", methods=["post"])
@@ -109,7 +99,7 @@ def findClosest():
     """
     Function taking a location from the webpage and checking for the closest station.
     Returns:
-        dict: Dictionary containing number of and distance to closest station.
+        dict: Dictionary containing availability data for closest stations.
     """
     data = dict(request.get_json())
     userloc = (data["userloc"]["lat"], data["userloc"]["lng"])
@@ -131,8 +121,12 @@ def findClosest():
     for i in closest.keys():
         stations.append(str(i))
 
+    input_time = pytz.timezone('Europe/Dublin').localize(input_datetime)
+    server_time = datetime.datetime.now().replace(tzinfo=pytz.timezone('UTC'))
+    local_time = server_time.astimezone(pytz.timezone('Europe/Dublin'))
+
     # check if entered time is more than 15 minutes in the future
-    if input_datetime > datetime.datetime.now() + datetime.timedelta(minutes=15):
+    if input_time > local_time + datetime.timedelta(minutes=15):
         # pass list of stations and time to model
         res = multi_availability_predict(stations, time, engine)
         for i in closest.keys():
@@ -155,4 +149,4 @@ def chart():
 
 
 if __name__ == "__main__":
-    app.run(debug=False)
+    app.run(debug=False, host="0.0.0.0")

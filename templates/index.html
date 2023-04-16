@@ -8,8 +8,14 @@
       <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
       <script type="text/javascript" src="../static/js/index.js"></script>
       <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.34/moment-timezone-with-data.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/dayjs@1.10.7/dayjs.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/dayjs@1.10.7/plugin/utc.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/dayjs@1.10.7/plugin/timezone.min.js"></script>
+
+      <script>
+          dayjs.extend(window.dayjs_plugin_utc);
+          dayjs.extend(window.dayjs_plugin_timezone);
+      </script>
 
       <script>
           setPinDic({{ dic|safe }})
@@ -104,8 +110,6 @@
           <script src="https://maps.googleapis.com/maps/api/js?key={{mapkey}}&libraries=places&callback=initMap&v=weekly" defer></script>
           <script>
               popWeatherCurrent({{wCur|safe}});
-              // popWeather48({{wetDic|safe}});
-              // popWeatherWeek({{wetDic|safe}});
           </script>
   </body>
 </html>

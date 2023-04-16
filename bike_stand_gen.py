@@ -24,5 +24,5 @@ for dict in res:
     bike_stands[dict['number']] = dict['bike_stands']
 
 # write bike_stands dictionary to pickle file
-with open("pickle_jar/bike_stands.pkl", 'wb') as handle:
+with open("/home/ubuntu/SWEProject/pickle_jar/bike_stands.pkl", 'wb') as handle:
     pickle.dump(bike_stands, handle, pickle.HIGHEST_PROTOCOL)

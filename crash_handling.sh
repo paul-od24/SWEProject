@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # path to map.py
-PYTHON_SCRIPT_PATH="/home/ubuntu/SWEProject/map.py"
+SCRIPT="/home/ubuntu/miniconda3/envs/comp30830/bin/gunicorn  --bind unix:/home/ubuntu/SWEProject/dublinbikes.sock wsgi:app"
 
 # email settings
 TO_EMAIL="dublinbikes23@gmail.com"
@@ -16,7 +16,7 @@ while true; do
     start_time=$(date +%s)
 
     # start map.py & capture stderr out
-    error_out=$(python3 $PYTHON_SCRIPT_PATH 2>&1 1>/dev/null)
+    error_out=$($SCRIPT 2>&1 1>/dev/null | tr -d '\000')
     exit_code=$?
 
     # if map.py crashes

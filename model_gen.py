@@ -119,7 +119,7 @@ for station_number in station_numbers:
         # fit model
         gbrt_pipeline.fit(features, y)
         # store model in pickle_jar
-        with open(f"pickle_jar/{station_number}_model.pkl", 'wb') as handle:
+        with open(f"/home/ubuntu/SWEProject/pickle_jar/{station_number}_model.pkl", 'wb') as handle:
             pickle.dump(gbrt_pipeline, handle, pickle.HIGHEST_PROTOCOL)
         print(f"Model created for station number {station_number}")
         num_models += 1
