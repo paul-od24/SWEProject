@@ -17,28 +17,28 @@ from selenium.webdriver.safari.webdriver import WebDriver as SafariWebDriver
 # list to store the different browsers
 browsers = []
 
-chrome_options = webdriver.ChromeOptions()
-# Chrome can't auto-accept geolocation requests in headless mode. If you run the tests with Chrome in headless mode,
-# test_current_location fails. This is expected. Include/exclude the line below as desired.
-# chrome_options.add_argument('headless')
-chrome_options.add_argument('--disable-popup-blocking')
-chrome_options.add_experimental_option("prefs", {"profile.default_content_setting_values.geolocation": 1})
-chrome = Service(ChromeDriverManager().install())
-browsers.append((webdriver.Chrome, chrome, chrome_options))
+# chrome_options = webdriver.ChromeOptions()
+# # Chrome can't auto-accept geolocation requests in headless mode. If you run the tests with Chrome in headless mode,
+# # test_current_location fails. This is expected. Include/exclude the line below as desired.
+# # chrome_options.add_argument('headless')
+# chrome_options.add_argument('--disable-popup-blocking')
+# chrome_options.add_experimental_option("prefs", {"profile.default_content_setting_values.geolocation": 1})
+# chrome = Service(ChromeDriverManager().install())
+# browsers.append((webdriver.Chrome, chrome, chrome_options))
 
-firefox_options = webdriver.FirefoxOptions()
-firefox_options.add_argument('-headless')
-firefox_options.set_preference("geo.prompt.testing", True)
-firefox_options.set_preference("geo.prompt.testing.allow", True)
-firefox = Service(GeckoDriverManager().install())
-browsers.append((webdriver.Firefox, firefox, firefox_options))
+# firefox_options = webdriver.FirefoxOptions()
+# firefox_options.add_argument('-headless')
+# firefox_options.set_preference("geo.prompt.testing", True)
+# firefox_options.set_preference("geo.prompt.testing.allow", True)
+# firefox = Service(GeckoDriverManager().install())
+# browsers.append((webdriver.Firefox, firefox, firefox_options))
 
 
-# edge_options = webdriver.EdgeOptions()
-# edge_options.add_argument('headless')
-# edge_options.add_experimental_option("prefs", {"profile.default_content_setting_values.geolocation": 1})
-# edge = Service(EdgeChromiumDriverManager().install())
-# browsers.append((webdriver.Edge, edge, edge_options))
+edge_options = webdriver.EdgeOptions()
+edge_options.add_argument('headless')
+edge_options.add_experimental_option("prefs", {"profile.default_content_setting_values.geolocation": 1})
+edge = Service(EdgeChromiumDriverManager().install())
+browsers.append((webdriver.Edge, edge, edge_options))
 
 # safari_capabilities = {"safari.options": {"useSimulatedGPS": True}}
 # # safari does not support headless mode

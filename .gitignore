@@ -11,7 +11,6 @@
 /DB_Backup
 /.ipynb_checkpoints
 /merged.csv
-/DB_Model.ipynb
 /pickle_jar
 /model_test.py
 /.DS_Store
