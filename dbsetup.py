@@ -61,6 +61,27 @@ try:
 except Exception as e:
     print(e)  # traceback.format_exc())
 
+
+# preparing sql statement to create latest availability table
+sql = """
+CREATE TABLE IF NOT EXISTS latest_availability(
+number INTEGER NOT NULL,
+available_bikes INTEGER,
+available_bike_stands INTEGER,
+last_update DATETIME,
+CONSTRAINT PK_availability PRIMARY KEY (number)
+);
+"""
+
+# creating latest availability table
+try:
+    with engine.begin() as connection:
+        res = connection.execute(text(sql))
+        print(res.fetchall())
+except Exception as e:
+    print(e)  # traceback.format_exc())
+
+
 # preparing sql statement to create weather_historical table
 sql = """
 CREATE TABLE IF NOT EXISTS weather_historical(

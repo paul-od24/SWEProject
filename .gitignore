@@ -8,4 +8,10 @@
 /wdata.xml
 /dbtest.py
 /__pycache__/
-
+/DB_Backup
+/.ipynb_checkpoints
+/merged.csv
+/pickle_jar
+/model_test.py
+/.DS_Store
+dublinbikes.sock

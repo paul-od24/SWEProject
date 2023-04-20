@@ -1,11 +1,15 @@
 import json
-
+import pytz
 from flask import Flask, render_template, request
 import sqlalchemy as sqla
 from sqlalchemy import create_engine, select, text
 from geopy import distance
+from itertools import islice
+import datetime
 import dblogin
 import apilogin
+from availability_predict import availability_predict, multi_availability_predict
+from average import getChartData
 
 # creating the engine
 engine = create_engine(
@@ -19,31 +23,12 @@ station = sqla.Table("station", metadataS,
                      schema='dbikes'
                      )
 
-metadataS = sqla.MetaData()
+metadataA = sqla.MetaData()
 # creating table object for availability table
-availability = sqla.Table("availability", metadataS,
-                     autoload_with=engine,
-                     schema='dbikes'
-                     )
-
-stmt = select(station.c.number, station.c.name, station.c.position_lat, station.c.position_lng)
-
-pinDic = {}
-
-with engine.begin() as connection:
-    for row in connection.execute(stmt):
-        pos = {"lat": float(row.position_lat), "lng": float(row.position_lng)}
-        # pin information
-        stmt2 = 'SELECT available_bikes, available_bike_stands, last_update FROM availability WHERE `number` = ' + str(
-            row.number) + ' ORDER BY last_update DESC LIMIT 1;'
-        res = connection.execute(text(stmt2)).mappings().all()[0]
-        pinDic[row.number] = dict(res)
-        pinDic[row.number]["name"] = row.name
-        pinDic[row.number]["position"] = pos
-        pinDic[row.number]["number"] = row.number
-        pinDic[row.number]["last_update"] = str(pinDic[row.number].get("last_update"))
-
-print(json.dumps(pinDic))
+availability = sqla.Table("availability", metadataA,
+                          autoload_with=engine,
+                          schema='dbikes'
+                          )
 
 # creating metadata objects for each of the tables
 metadataWH = sqla.MetaData()
@@ -61,53 +46,107 @@ weather_forecast = sqla.Table("weather_forecast", metadataWF,
                               schema='dbikes'
                               )
 
-# creating wCur dictionary
-wCur = {}
-# prpearing sql statement to get current weather
-stmt = "SELECT * FROM weather_historical ORDER BY `time` DESC LIMIT 1"
-# executing sql statment
-with engine.begin() as connection:
+app = Flask(__name__, template_folder="./templates")
+
+
+def update_data(pinDic, wCur):
+    """
+    Function that gets the latest bike and weather data and stores it in the appropriate dictionaries.
+    Returns: void
+    """
+    # sql statement to select bike data
+    stmt = '''SELECT station.number, name, position_lat, position_lng, available_bikes, available_bike_stands, last_update
+    FROM station, latest_availability
+    WHERE station.`number` = latest_availability.number;
+    '''
+
+    with engine.begin() as connection:
+        for row in connection.execute(text(stmt)):
+            pos = {"lat": float(row.position_lat), "lng": float(row.position_lng)}
+            pinDic[row.number] = {"number": row.number, "name": row.name, "position": pos,
+                                  "available_bikes": row.available_bikes,
+                                  "available_bike_stands": row.available_bike_stands,
+                                  "last_update": str(row.last_update)}
+
+    # preparing sql statement to get current weather
+    stmt = "SELECT * FROM weather_historical ORDER BY `time` DESC LIMIT 1"
+    # executing sql statement
+    with engine.begin() as connection:
         res = connection.execute(text(stmt))
         res = res.mappings().all()
         res = res[0]
-        data = {"symbol": res.symbol, "rain": res.rain}
-        wCur = data
-
-# preparing sql statement to get current weather
-stmt = select(weather_forecast.c.end, weather_forecast.c.symbol, weather_forecast.c.rain_hourly)
-
-# creating weather forecast dictionary
-wetDic = {}
-
-# executing sql statement
-with engine.begin() as connection:
-    for row in connection.execute(stmt):
-        data = {"symbol": row.symbol, "rain": row.rain_hourly}
-        wetDic[str(row.end)] = data
-
-app = Flask(__name__, template_folder="./templates")
+        wCur["symbol"] = res.symbol
+        wCur["rain"] = res.rain
+        wCur["temp"] = res.temp
 
 
 @app.route("/")
 def mapview():
-    return render_template('index.html', dic=json.dumps(pinDic), mapkey=apilogin.MAPKEY, wCur=json.dumps(wCur),
-                           wetDic=json.dumps(wetDic))
+    """
+    Function returning rendered template index.html including variables needed for weather & pins
+    Returns:
+        object: rendered flask template
+    """
+    pinDic = {}
+    wCur = {}
 
-# function taking a location from the webpage and checking for the closest station
+    update_data(pinDic, wCur)
+    return render_template('index.html', dic=json.dumps(pinDic), mapkey=apilogin.MAPKEY, wCur=json.dumps(wCur))
+
+
 @app.route("/", methods=["post"])
 def findClosest():
-    userloc = dict(request.get_json())
-    userloc = (userloc["lat"], userloc["lng"])
-    mindist = -1
-    closest = {"failed": "failed"}
+    """
+    Function taking a location from the webpage and checking for the closest station.
+    Returns:
+        dict: Dictionary containing availability data for closest stations.
+    """
+    data = dict(request.get_json())
+    userloc = (data["userloc"]["lat"], data["userloc"]["lng"])
+    pinDic = data["pinDic"]
+    input_datetime = datetime.datetime.strptime(data["time"], '%Y-%m-%dT%H:%M')
+    time = input_datetime.strftime('%Y-%m-%d %H:%M:%S')
+    d_dic = {}
+    predictions = {}
     for i in pinDic:
-        teststation = (pinDic[i]["position"].get("lat"), pinDic[i]["position"].get("lng"))
-        d = distance.distance(userloc, teststation).m
-        if mindist == -1 or d < mindist:
-            mindist = round(d, 0)
-            closest = {"number": i, "distance": mindist}
-    return closest
+        station = (pinDic[i]["position"].get("lat"), pinDic[i]["position"].get("lng"))
+        d = distance.distance(userloc, station).m
+        d_dic[i] = d
+    d_dic_sorted = dict(sorted(d_dic.items(), key=lambda item: item[1]))
+
+    closest = dict(islice(d_dic_sorted.items(), 10))
+
+    # create list of stations
+    stations = []
+    for i in closest.keys():
+        stations.append(str(i))
+
+    input_time = pytz.timezone('Europe/Dublin').localize(input_datetime)
+    server_time = datetime.datetime.now().replace(tzinfo=pytz.timezone('UTC'))
+    local_time = server_time.astimezone(pytz.timezone('Europe/Dublin'))
+
+    # check if entered time is more than 15 minutes in the future
+    if input_time > local_time + datetime.timedelta(minutes=15):
+        # pass list of stations and time to model
+        res = multi_availability_predict(stations, time, engine)
+        for i in closest.keys():
+            bikes, stands = res[i][0], res[i][1]
+            predictions[i] = {"dist": closest[i], "bikes": bikes, "stands": stands}
+    else:
+        for i in closest.keys():
+            bikes, stands = pinDic[i].get("available_bikes"), pinDic[i].get("available_bike_stands")
+            predictions[i] = {"dist": closest[i], "bikes": bikes, "stands": stands}
+
+    return predictions
+
+
+@app.route("/graph", methods=["post"])
+def chart():
+    station_number = int(request.get_data(as_text=True))
+    print(station_number)
+
+    return getChartData(station_number)
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False, host="0.0.0.0")
